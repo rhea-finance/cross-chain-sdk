@@ -854,7 +854,7 @@ MIT
 
 ## Related Links
 
-- Demo Project: [cross-chain-demo](https://github.com/xieqiancaosissi/cross-chain-demo)
+- Demo Project: [cross-chain-demo](https://github.com/rhea-finance/cross-chain-demo)
 - Rhea Finance: https://rhea.finance
 
 ## Contributing
