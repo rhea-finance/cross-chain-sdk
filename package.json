@@ -1,6 +1,6 @@
 {
   "name": "@rhea-finance/cross-chain-sdk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Cross-chain lending SDK",
   "type": "module",
   "main": "./dist/index.js",

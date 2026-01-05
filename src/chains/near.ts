@@ -1,8 +1,8 @@
 import Decimal from "decimal.js";
-import { keyStores, connect } from "near-api-js";
+import { keyStores, connect, Near } from "near-api-js";
 import { config_near } from "../config";
 
-async function getAccountConnection(accountId?: string) {
+export async function getNearConnection(): Promise<Near> {
   let keyStore: keyStores.KeyStore;
   if (typeof (globalThis as any)["window"] === "undefined") {
     keyStore = new keyStores.InMemoryKeyStore();
@@ -14,6 +14,11 @@ async function getAccountConnection(accountId?: string) {
     networkId: config_near.networkId,
     nodeUrl: config_near.nodeUrl,
   });
+  return connection;
+}
+
+export async function getAccountConnection(accountId?: string) {
+  const connection = await getNearConnection();
   const account = await connection.account(
     accountId || config_near.LOGIC_CONTRACT_NAME
   );
