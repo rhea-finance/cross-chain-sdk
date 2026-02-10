@@ -10,8 +10,7 @@ import {
   QuotationParams,
 } from "../types/index";
 const { oneClickUrl, indexUrl, findPathUrl } = config_near;
-export const getSignature = (plaintext: string) => {
-  const key = process.env.NEXT_PUBLIC_CRYPTO_KEY;
+export const getSignature = (plaintext: string, key?: string) => {
   if (!key) return;
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(key), iv);
