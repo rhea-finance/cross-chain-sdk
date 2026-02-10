@@ -1,3 +1,6 @@
+import type { IAssetsView, Assets } from "./asset";
+import type { IConfig } from "./burrow";
+
 export interface IFarmId {
   Supplied?: string;
   Borrowed?: string;
@@ -103,4 +106,18 @@ export interface IAccountAllPositionsDetailed {
   has_non_farmed_assets: boolean;
   is_locked: boolean;
   positions: IPositionsOrigin;
+}
+
+export interface IBatchViewsWithTransformsResult {
+  assetsView: IAssetsView;
+  portfolioView: Portfolio | undefined;
+  config: IConfig;
+}
+
+export interface IGetSimpleWithdrawDataParams {
+  nearStorageAmount: string | number; // read amount
+  mca: string;
+  assets: IAssetsView | Assets;
+  portfolio: Portfolio;
+  businessNum?: number;
 }

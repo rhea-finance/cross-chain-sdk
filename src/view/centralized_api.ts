@@ -9,7 +9,7 @@ import {
   IIntentsQuoteResult,
   QuotationParams,
 } from "../types/index";
-const { oneClickUrl, indexUrl } = config_near;
+const { oneClickUrl, indexUrl, findPathUrl } = config_near;
 export const getSignature = (plaintext: string) => {
   const key = process.env.NEXT_PUBLIC_CRYPTO_KEY;
   if (!key) return;
@@ -315,6 +315,51 @@ export async function pollingTransactionStatus(
   };
 }
 
+export async function findPath({
+  amountIn,
+  tokenIn,
+  tokenOut,
+  slippage,
+}: {
+  amountIn: string | number;
+  tokenIn: string;
+  tokenOut: string;
+  slippage: number;
+}) {
+  if (!tokenIn || !tokenOut) {
+    return {
+      result_code: 1007,
+      result_message: "internal error: missing tokenIn or tokenOut",
+      result_data: null,
+    };
+  }
+
+  const timeoutDuration = 5000;
+  const controller = new AbortController();
+  const timeOutId = setTimeout(() => controller.abort(), timeoutDuration);
+
+  const params = new URLSearchParams({
+    amountIn: String(amountIn),
+    tokenIn: String(tokenIn),
+    tokenOut: String(tokenOut),
+    pathDeep: String(3),
+    slippage: String(Number(slippage)),
+  });
+
+  const url = `${findPathUrl}/findPath?${params.toString()}`;
+
+  const resultFromServer = await fetch(url, { signal: controller.signal })
+    .then((res) => res.json())
+    .catch((error) => ({
+      result_code: 1007,
+      result_message: error?.message || "internal error",
+      result_data: null,
+    }))
+    .finally(() => clearTimeout(timeOutId));
+
+  return resultFromServer;
+}
+
 export async function getMultichainLendingConfig(): Promise<
   Record<string, string>[]
 > {
@@ -343,7 +388,7 @@ export async function postMultichainLendingRequests({
   mca_id: string;
   wallet: string;
   request: string[];
-  page_display_data: string;
+  page_display_data?: string;
 }): Promise<{
   code: number;
   data: string;

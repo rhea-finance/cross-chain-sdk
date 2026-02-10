@@ -110,12 +110,14 @@ const prices: IPrices | undefined = await getPrices({
 import {
   getMcaByWallet,
   getListWalletsByMca,
-  getCeateMcaFee,
+  getCreateMcaFee,
   getCreateMcaFeePaged,
   getNearValue,
   getNearValuesPaged,
-} from "@rhea-finance/cross-chain-sdk";
-import type { IChain, IWallet } from "@rhea-finance/cross-chain-sdk";
+  getZcashCreateMcaDepositAddress,
+  getZcashResponseDataByAddress,
+} from "@rhea-finance/cIChainross-chain-sdk";
+import type { , IWallet } from "@rhea-finance/cross-chain-sdk";
 
 // Get MCA by wallet - query multi-chain account based on logged-in wallet
 // Parameters:
@@ -133,7 +135,7 @@ const mcaId: string | null = await getMcaByWallet({
 const wallets: IWallet[] = await getListWalletsByMca(mcaId);
 
 // Get create MCA fee - get creation fee for a specific asset
-const createFee: string = await getCeateMcaFee("usdt.tether-token.near");
+const createFee: string = await getCreateMcaFee("usdt.tether-token.near");
 
 // Get create MCA fee paged - get list of creation fee tokens
 const createFeeList: Record<string, string> = await getCreateMcaFeePaged();
@@ -143,6 +145,12 @@ const nearValue: string = await getNearValue("usdt.tether-token.near");
 
 // Get near values paged - get all token exchange rates with NEAR
 const nearValues: Record<string, string> = await getNearValuesPaged();
+
+// Get Zcash create MCA deposit address - get deposit address when creating MCA with Zcash (Old way)
+const zcashDepositAddress: string = await getZcashCreateMcaDepositAddress("multica.near");
+
+// Get Zcash response data by address - query Zcash deposit/creation status (Old way)
+const zcashData = await getZcashResponseDataByAddress(address);
 ```
 
 ## Operations
@@ -210,6 +218,39 @@ const depositAddress = res_quote.quoteSuccessResult?.quote?.depositAddress;
 // Transfer funds to depositAddress using your wallet
 ```
 
+### Create MCA via Zcash (Old way)
+
+When creating an MCA account with Zcash, use `getZcashCreateMcaDepositAddress` to obtain the deposit address:
+
+```typescript
+import { getZcashCreateMcaDepositAddress } from "@rhea-finance/cross-chain-sdk";
+
+// Get deposit address for Zcash MCA creation
+// Parameters:
+//   am_id: Account manager ID (e.g., "multica.near")
+const depositAddress: string = await getZcashCreateMcaDepositAddress("multica.near");
+
+// Transfer Zcash to depositAddress to complete MCA creation
+```
+
+### getZcashResponseDataByAddress (Old way)
+
+Get Zcash deposit/creation data by address. Query the status and details of a Zcash MCA creation or adding wallet flow:
+
+```typescript
+import {
+  getZcashResponseDataByAddress,
+  type IDataByAddressResponse,
+} from "@rhea-finance/cross-chain-sdk";
+
+// Parameters:
+//   address: Zcash deposit address
+const data: IDataByAddressResponse | undefined =
+  await getZcashResponseDataByAddress(address);
+
+// data contains: deposit_address, mca_id, status, tx_hash, application, etc.
+```
+
 ### Cross-chain Supply
 
 ```typescript
@@ -234,6 +275,38 @@ const quoteResult = await intentsQuotation({
 
 // Transfer to depositAddress
 const depositAddress = quoteResult.quoteSuccessResult?.quote?.depositAddress;
+```
+
+### getSupplyDepositData
+
+Get supply deposit address and quote result, simplifies Cross-chain Supply flow:
+
+```typescript
+import { getSupplyDepositData } from "@rhea-finance/cross-chain-sdk";
+
+// Parameters:
+//   chain: Chain type, supports "evm" | "solana" | "btc"
+//   identityKey: Wallet address or public key
+//   useAsCollateral: Whether to use as collateral
+//   originAsset: Origin asset (e.g. "nep141:usdt.tether-token.near")
+//   destinationAsset: Destination asset
+//   amount: Amount (raw amount)
+//   refundTo: Refund address
+//   recipient: MCA account address
+const result = await getSupplyDepositData({
+  chain: "evm",
+  identityKey: "0x1234...",
+  useAsCollateral: true,
+  originAsset: "nep141:usdt.tether-token.near",
+  destinationAsset: "nep141:wrap.near",
+  amount: "1000000",
+  refundTo: "rhea00000x.multica.near",
+  recipient: "rhea00000x.multica.near",
+});
+
+// Transfer to depositAddress to complete Supply
+const depositAddress = result.depositAddress;
+// result also contains quoteResult's full quote data
 ```
 
 ### Cross-chain Repay
@@ -293,8 +366,8 @@ const { businessMap, quoteResult } = await prepareBusinessDataOnBorrow({
   tokenId: "usdt.tether-token.near",
   originAsset: "nep141:usdt.tether-token.near",
   destinationAsset: "xxxx",
-  amountBurrow: simpleWithdrawData?.amountBurrow || "0",
-  amountToken: simpleWithdrawData?.amountToken || "0",
+  amountBurrow,
+  amountToken,
   config: config,
   simpleWithdrawData: simpleWithdrawData,
 });
@@ -334,7 +407,7 @@ if (relayer_result?.code == 0) {
 
 ```typescript
 // Get simple withdraw data (see Cross-chain Borrow section for detailed explanation)
-const simpleWithdrawData: ISimpleWithdraw | null = await getSimpleWithdrawData({
+const simpleWithdrawData: ISimpleWithdraw | null = await computeRelayerGas({
   nearStorageAmount,
   mca,
   relayerGasFees,
@@ -521,7 +594,7 @@ if (relayer_result?.code == 0) {
 
 ```typescript
 // Get simple withdraw data (see Cross-chain Borrow section for detailed explanation)
-const simpleWithdrawData: ISimpleWithdraw | null = await getSimpleWithdrawData({
+const simpleWithdrawData: ISimpleWithdraw | null = await computeRelayerGas({
   nearStorageAmount,
   mca,
   relayerGasFees,
@@ -585,7 +658,7 @@ if (relayer_result?.code == 0) {
 
 ```typescript
 // Get simple withdraw data (see Cross-chain Borrow section for detailed explanation)
-const simpleWithdrawData: ISimpleWithdraw | null = await getSimpleWithdrawData({
+const simpleWithdrawData: ISimpleWithdraw | null = await computeRelayerGas({
   nearStorageAmount,
   mca,
   relayerGasFees,
@@ -686,6 +759,101 @@ if (relayer_result?.code == 0) {
 }
 ```
 
+### Cross-chain Withdraw Rewards
+
+```typescript
+import {
+  prepareBusinessDataOnWithdrawRewards,
+  getUnclaimedRewards,
+  batchViewsData,
+  getSimpleWithdrawData,
+  format_wallet,
+  serializationObj,
+  NDeposit,
+  TOKEN_STORAGE_DEPOSIT_READ,
+  postMultichainLendingRequests,
+  pollingRelayerTransactionResult,
+} from "@rhea-finance/cross-chain-sdk";
+
+// Get assets, portfolio and config (e.g. for MCA)
+const mca = "your_mca_id";
+const { assetsView, portfolioView, config } = await batchViewsData(mca);
+
+// Get unclaimed rewards and pick one to withdraw
+const unclaimedRewards = getUnclaimedRewards({ portfolioView, assetsView });
+const unclaimedReward = unclaimedRewards[0];
+
+// Get simple withdraw data (relayer gas)
+const gasData = await getSimpleWithdrawData({
+  nearStorageAmount: "0.00125",
+  mca,
+  assets: assetsView,
+  portfolio: portfolioView,
+  businessNum: 2, // optional
+});
+const simpleWithdrawData = gasData?.simpleWithdrawData ?? null;
+
+// Prepare withdraw rewards business data
+const receiveTokenId = "zec.omft.near";
+const originAsset = "1cs_v1:near:nep141:zec.omft.near";
+const destinationAsset = "nep141:zec.omft.near";
+const recipient = "t1dsFgNR2nr99MJ7Dq2Wwk3d4EnUs43ATqY";
+
+const res = await prepareBusinessDataOnWithdrawRewards({
+  mca,
+  rewardTokenId: unclaimedReward?.rewardTokenId,
+  amountBurrow: unclaimedReward?.amountBurrow,
+  amountToken: unclaimedReward?.amountToken,
+  config,
+  simpleWithdrawData,
+  receiveTokenId,
+  originAsset,
+  destinationAsset,
+  recipient,
+});
+
+if (res.status === "success") {
+  const { businessMap, businessMapExtra } = res;
+  const signedBusiness = await sign_message({
+    message: JSON.stringify(businessMap),
+  });
+  const signedBusinessExtra = await sign_message({
+    message: JSON.stringify(businessMapExtra),
+  });
+
+  const wallet = format_wallet({ chain, identityKey });
+  const relayer_result = await postMultichainLendingRequests({
+    mca_id: mca,
+    wallet: serializationObj(wallet),
+    request: [
+      serializationObj({
+        signer_wallet: wallet,
+        business: businessMap,
+        signature: signedBusiness,
+        attach_deposit: NDeposit(TOKEN_STORAGE_DEPOSIT_READ),
+      }),
+      serializationObj({
+        signer_wallet: wallet,
+        business: businessMapExtra,
+        signature: signedBusinessExtra,
+        attach_deposit: NDeposit(TOKEN_STORAGE_DEPOSIT_READ),
+      }),
+    ],
+  });
+
+  if (relayer_result?.code === 0) {
+    const { status, tx_hash } = await pollingRelayerTransactionResult(
+      relayer_result.data,
+      2000
+    );
+    console.log("Transaction status:", status);
+    console.log("Transaction hash:", tx_hash);
+  }
+} else {
+  console.error("Prepare failed:", res.message);
+}
+```
+
 ## Core API
 
 ### Actions
@@ -740,15 +908,21 @@ if (relayer_result?.code == 0) {
 - `prepareBusinessDataOnRepayFromSupplied` - Prepare repay from supplied business data
 - `prepareBusinessDataOninnerWithdraw` - Prepare inner withdraw business data
 
-**Custom Recipient Messages**
+**MCA Creation**
 - `getCreateMcaCustomRecipientMsg` - Get custom recipient message for creating MCA
+- `getZcashCreateMcaDepositAddress` - Get deposit address when creating MCA with Zcash (Old way)
+- `getZcashResponseDataByAddress` - Get Zcash deposit/creation data by address (Old way)
+
+**Custom Recipient Messages**
 - `getSupplyCustomRecipientMsg` - Get custom recipient message for supply
+- `getSupplyDepositData` - Get supply deposit address and quote result
 - `getRepayCustomRecipientMsg` - Get custom recipient message for repay
 
 **Account Management**
 - `prepareBusinessDataOnAddWallet` - Prepare add wallet business data
 - `prepareBusinessDataOnRemoveWallet` - Prepare remove wallet business data
 - `prepareBusinessDataOnClaim` - Prepare claim rewards business data
+- `prepareBusinessDataOnWithdrawRewards` - Prepare cross-chain withdraw rewards business data
 
 
 **General Utilities**

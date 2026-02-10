@@ -35,7 +35,7 @@ export type IWallet =
   | { Solana: string }
   | { Bitcoin: string };
 
-export type IChain = "evm" | "solana" | "btc";
+export type IChain = "evm" | "solana" | "btc" | "zcash";
 export interface IBusiness {
   nonce: string;
   deadline: string;
@@ -62,8 +62,9 @@ export interface IIntentItem {
 export interface ISimpleWithdraw {
   tokenId: string;
   amount: string | number;
-  amountToken: string | number;
   amountBurrow: string | number;
+  amountToken?: string | number;
+  relayerId?: string;
 }
 
 export interface IRelayerResult {
@@ -114,6 +115,7 @@ export interface IGasData {
   amountBurrow: string | number;
   relayerFeeUsd: string | number;
   simpleWithdrawData: {
+    relayerId?: string;
     tokenId: string;
     amount: string;
     amountToken: string;

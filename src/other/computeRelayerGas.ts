@@ -16,12 +16,14 @@ export const computeRelayerGas = ({
   relayerGasFees,
   assets,
   portfolio,
+  businessNum = 1,
 }: {
   nearStorageAmount: string | number;
   mca: string;
   relayerGasFees: Record<string, string>;
   assets: IAssetsView | Assets;
   portfolio: Portfolio;
+  businessNum?: number;
 }): IGasData | undefined => {
   if (!mca || _.isEmpty(assets) || _.isEmpty(portfolio)) return;
   const { tokenId, amount, relayerFeeUsd } = searchMatchAssetId({
@@ -29,6 +31,7 @@ export const computeRelayerGas = ({
     assets,
     nearStorageAmount,
     relayerGasFees,
+    businessNum,
   });
   if (!tokenId) return;
   const asset = assets[tokenId];
@@ -151,11 +154,13 @@ function searchMatchAssetId({
   assets,
   nearStorageAmount,
   relayerGasFees,
+  businessNum = 1,
 }: {
   portfolio: Portfolio;
   assets: IAssetsView | Assets;
   nearStorageAmount: string | number;
   relayerGasFees: Record<string, string>;
+  businessNum?: number;
 }) {
   const costNearUSD = new Decimal(
     assets[config_near.WRAP_NEAR_CONTRACT_ID]?.price?.usd || 0
@@ -170,11 +175,14 @@ function searchMatchAssetId({
         (_asset?.config?.extra_decimals || 0) +
           (_asset?.metadata?.decimals || 0)
       );
-      const _amount_relayer =
+      const _amount_relayer = new Decimal(
         shrinkToken(
           relayerGasFees[token_id] || 0,
           _asset?.metadata?.decimals || 0
-        ) || 0;
+        ) || 0
+      )
+        .mul(businessNum)
+        .toFixed();
       return {
         token_id,
         token_price: _price,
@@ -217,11 +225,14 @@ function searchMatchAssetId({
         (_asset?.config?.extra_decimals || 0) +
           (_asset?.metadata?.decimals || 0)
       );
-      const _amount_relayer =
+      const _amount_relayer = new Decimal(
         shrinkToken(
           relayerGasFees[token_id] || 0,
           _asset?.metadata?.decimals || 0
-        ) || 0;
+        ) || 0
+      )
+        .mul(businessNum)
+        .toFixed();
       return {
         token_id,
         token_price: _price,

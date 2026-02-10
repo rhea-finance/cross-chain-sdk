@@ -35,7 +35,7 @@ export async function getListWalletsByMca(mca: string) {
   return res;
 }
 
-export async function getCeateMcaFee(token_id: string) {
+export async function getCreateMcaFee(token_id: string) {
   const res = await view_on_near({
     contractId: config_near.AM_CONTRACT,
     methodName: "get_create_mca_fee",

@@ -8,3 +8,4 @@ export * from "./get-portfolio";
 export * from "./get-balance";
 export * from "./get-farms";
 export * from "./get-config";
+export * from "./zcash";

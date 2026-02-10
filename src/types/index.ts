@@ -5,3 +5,5 @@ export * from "./account";
 export * from "./contract-methods";
 export * from "./oracle";
 export * from "./asset";
+export * from "./zcash";
+export * from "./rewards";

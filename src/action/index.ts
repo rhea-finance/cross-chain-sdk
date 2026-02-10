@@ -11,3 +11,4 @@ export * from "./addWallet";
 export * from "./removeWallet";
 export * from "./innnerWithdraw";
 export * from "./claim";
+export * from "./withdrawRewards";

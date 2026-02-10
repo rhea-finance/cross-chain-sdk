@@ -17,6 +17,8 @@ export function format_wallet({
     w = { Solana: identityKey };
   } else if (chain == "btc") {
     w = { Bitcoin: identityKey };
+  } else if (chain == "zcash") {
+    w = { Zcash: identityKey };
   }
   return w;
 }

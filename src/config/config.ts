@@ -16,8 +16,8 @@ interface INEARConfig {
   WBTC_TOKEN_ID: string;
   hiddenAssets: string[];
   oneClickUrl: string;
+  findPathUrl: string;
   RELAYER_ID: string;
-  HHHH: string;
 }
 let customNodeUrl = "";
 export const setCustomNodeUrl = (nodeUrl: string) => {
@@ -30,7 +30,7 @@ function getConfig() {
     explorerUrl: "https://nearblocks.io",
     LOGIC_CONTRACT_NAME: "contract.main.burrow.near",
     AM_CONTRACT: "multica.near",
-    RELAYER_ID: "bestdome534.near",
+    RELAYER_ID: "mca-relayer.rhealab.near",
     REF_EXCHANGE_ID: "v2.ref-finance.near",
     PYTH_ORACLE_ID: "pyth-oracle.near",
     WRAP_NEAR_CONTRACT_ID: "wrap.near",
@@ -42,6 +42,7 @@ function getConfig() {
     dataServiceUrl: "https://apidata.rhea.finance",
     txIdApiUrl: "https://api3.nearblocks.io",
     oneClickUrl: "https://1click.chaindefuser.com/v0",
+    findPathUrl: "https://smartrouter.rhea.finance",
     hiddenAssets: [
       "meta-token.near",
       "usn",
@@ -53,7 +54,6 @@ function getConfig() {
       "45.contract.portalbridge.near",
       "shadow_ref_v1-4179",
     ],
-    HHHH: "xieqian",
   };
   return {
     NEAR: NEAR_CONFIG,

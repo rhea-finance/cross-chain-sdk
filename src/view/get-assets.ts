@@ -7,10 +7,14 @@ import {
   IConfig,
   Assets,
   ViewMethodsLogic,
+  Asset,
+  IAssetsView,
 } from "../types";
+import { transformAssets } from "../utils/transformers/asstets";
 import { getAllMetadata } from "./get-all-metadata";
-import { getPrices } from "./get-prices";
+import { getPrices, getTokenPythInfos } from "./get-prices";
 import { config_near } from "../config";
+import { getConfig } from "./get-config";
 import { view_on_near } from "../chains/near";
 
 const getPrice = (
@@ -67,4 +71,32 @@ export const getAssetsDetail = async (): Promise<IAssetDetailed[]> => {
     contractId: config_near.LOGIC_CONTRACT_NAME,
     methodName: ViewMethodsLogic[ViewMethodsLogic.get_assets_paged_detailed],
   })) as IAssetDetailed[];
+};
+
+export const getAssetDetailByAssetId = async (
+  assetId: string
+): Promise<Asset | undefined> => {
+  const assets_paged_detailed = await getAssetsDetail();
+  const token_pyth_infos = await getTokenPythInfos();
+  const config = await getConfig();
+  const assets = await getAssets({
+    assets_paged_detailed,
+    token_pyth_infos,
+    config,
+  });
+  const transformedAssets = transformAssets(assets);
+  return transformedAssets[assetId];
+};
+
+export const getAssetDetailsView = async (): Promise<IAssetsView> => {
+  const assets_paged_detailed = await getAssetsDetail();
+  const token_pyth_infos = await getTokenPythInfos();
+  const config = await getConfig();
+  const assets = await getAssets({
+    assets_paged_detailed,
+    token_pyth_infos,
+    config,
+  });
+  const transformedAssets = transformAssets(assets);
+  return transformedAssets;
 };
