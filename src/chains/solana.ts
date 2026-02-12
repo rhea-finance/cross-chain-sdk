@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import _ from "lodash";
 
 export function prepare_sign_message_solana(message: string) {

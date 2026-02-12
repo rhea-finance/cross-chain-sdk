@@ -1,34 +1,42 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  // entry file
   entry: ['src/index.ts'],
-  
-  // output format: CommonJS + ES Modules
   format: ['cjs', 'esm'],
-  
-  // generate TypeScript type definition file
   dts: true,
-  
-  // code splitting (SDK usually set to false)
   splitting: false,
-  
-  // generate source map
   sourcemap: true,
-  
-  // clean dist directory before building
   clean: true,
-  
-  // Tree-shaking optimization
   treeshake: true,
-  
-  // whether to compress (false for development, true for production)
   minify: false,
-  
-  
-  // output directory
   outDir: 'dist',
-  
-  // compile target version
   target: 'es2020',
+  platform: 'browser',
+  noExternal: [
+    'near-api-js',
+    /^@near-js\//,
+    'buffer',
+    'safe-buffer',
+    'randombytes',
+    'borsh',
+    'bn.js',
+    'bs58',
+    'base-x',
+    'tweetnacl',
+    'js-sha256',
+    'mustache',
+  ],
+  esbuildOptions(options) {
+    options.define = {
+      ...options.define,
+      'global': 'globalThis',
+    }
+    options.alias = {
+      ...options.alias,
+      'http': './src/shims/empty.ts',
+      'https': './src/shims/empty.ts',
+      'crypto': './src/shims/crypto.ts',
+    }
+  },
+  inject: ['./src/polyfills.ts'],
 });

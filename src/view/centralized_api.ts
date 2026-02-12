@@ -1,6 +1,4 @@
 import { config_near } from "../config/config";
-// @ts-ignore
-import crypto from "crypto-browserify";
 import {
   IRelayerResult,
   IIntentItem,
@@ -10,20 +8,65 @@ import {
   QuotationParams,
 } from "../types/index";
 const { oneClickUrl, indexUrl, findPathUrl } = config_near;
-export const getSignature = (plaintext: string, key?: string) => {
-  if (!key) return;
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(key), iv);
-  let encrypted = cipher.update(plaintext, "utf-8", "base64");
-  encrypted += cipher.final("base64");
-  return iv.toString("base64") + encrypted;
-};
+let _signatureCache: { key: CryptoKey; raw: Uint8Array } | null = null;
 
-export const getAuthenticationHeaders = (path: string) => {
+async function _getOrImportKey(): Promise<{
+  key: CryptoKey;
+  raw: Uint8Array;
+} | null> {
+  if (_signatureCache) return _signatureCache;
+  const keyStr =
+    (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_CRYPTO_KEY) ||
+    undefined;
+  if (!keyStr) return null;
+  try {
+    const raw = new TextEncoder().encode(keyStr);
+    const key = await globalThis.crypto.subtle.importKey(
+      "raw",
+      raw,
+      { name: "AES-CBC" },
+      false,
+      ["encrypt"]
+    );
+    _signatureCache = { key, raw };
+    return _signatureCache;
+  } catch {
+    return null;
+  }
+}
+
+function _toBase64(buf: ArrayBuffer): string {
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+export async function getSignature(
+  plaintext: string
+): Promise<string | undefined> {
+  const imported = await _getOrImportKey();
+  if (!imported) return undefined;
+  const iv = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  const encoded = new TextEncoder().encode(plaintext);
+  const encrypted = await globalThis.crypto.subtle.encrypt(
+    { name: "AES-CBC", iv },
+    imported.key,
+    encoded
+  );
+  return _toBase64(iv.buffer) + _toBase64(encrypted);
+}
+
+export const getAuthenticationHeaders = async (
+  path: string
+): Promise<Record<string, string>> => {
   const time = Math.round(new Date().getTime() / 1000);
   const o = { path, time };
   const str = JSON.stringify(o);
-  const signature = getSignature(str);
+  const signature = await getSignature(str);
+  if (!signature) return {};
   return {
     Authentication: signature,
   };
@@ -42,9 +85,9 @@ export async function get_liquidations(
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8",
-          ...getAuthenticationHeaders(
+          ...(await getAuthenticationHeaders(
             `/burrow/get_burrow_liquidate_records/${accountId}`
-          ),
+          )),
         },
       }
     );
@@ -87,9 +130,9 @@ export async function get_token_detail(tokenId: string, period = 1) {
           method: "GET",
           headers: {
             "Content-type": "application/json; charset=UTF-8",
-            ...getAuthenticationHeaders(
+            ...(await getAuthenticationHeaders(
               `${config_near.dataServiceUrl}/burrow/get_token_detail/${tokenId}`
-            ),
+            )),
           },
         }
       )
@@ -130,9 +173,9 @@ export async function get_interest_rate(tokenId: string) {
           method: "GET",
           headers: {
             "Content-type": "application/json; charset=UTF-8",
-            ...getAuthenticationHeaders(
+            ...(await getAuthenticationHeaders(
               `${config_near.dataServiceUrl}/burrow/get_token_interest_rate/${tokenId}`
-            ),
+            )),
           },
         }
       )
@@ -160,9 +203,9 @@ export async function get_records(
           method: "GET",
           headers: {
             "Content-type": "application/json; charset=UTF-8",
-            ...getAuthenticationHeaders(
+            ...(await getAuthenticationHeaders(
               `${config_near.indexUrl}/get-burrow-records`
-            ),
+            )),
           },
         }
       )

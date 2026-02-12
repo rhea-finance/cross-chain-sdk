@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 export function prepare_sign_message_btc(message: string) {
   return message;
 }
