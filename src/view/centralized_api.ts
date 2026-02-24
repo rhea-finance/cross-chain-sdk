@@ -425,7 +425,7 @@ export async function postMultichainLendingRequests({
   mca_id,
   wallet,
   request,
-  page_display_data,
+  page_display_data = "",
 }: {
   mca_id: string;
   wallet: string;
