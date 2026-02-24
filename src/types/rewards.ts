@@ -1,5 +1,5 @@
 import type { Portfolio } from "./account";
-import type { IAssetsView, Asset } from "./asset";
+import type { IAssetsView, Asset, IMetadata } from "./asset";
 import { IConfig } from "./burrow";
 import { IBusiness, ISimpleWithdraw } from "./chains";
 import { IIntentsQuoteResult } from "./common";
@@ -45,4 +45,13 @@ export interface IUnclaimedRewardItem {
   amountRead?: string;
   amountUsd?: string;
   rewardTokenAssetView?: Asset;
+}
+
+export interface IFarmDetailsOfAsset {
+  minFarmApy: number;
+  maxFarmApy: number;
+  tokenNetRewards: IMetadata[];
+  canBeBooster: boolean;
+  supplyApy: number;
+  borrowApy: number;
 }

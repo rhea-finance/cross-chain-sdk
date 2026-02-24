@@ -759,6 +759,33 @@ if (relayer_result?.code == 0) {
 }
 ```
 
+### Get farm details for an asset
+
+```typescript
+import {
+  getFarmDetailsOfAsset,
+  getAssetDetailsView,
+} from "@rhea-finance/cross-chain-sdk";
+
+// Get assets view (IAssetsView)
+const assets = await getAssetDetailsView();
+
+// Get farm details for a specific asset
+const farmDetails = getFarmDetailsOfAsset({
+  assets,
+  assetId: "zec.omft.near",
+  booster: 1.5, // optional, default 1.5
+});
+
+// farmDetails: IFarmDetailsOfAsset
+console.log(farmDetails.minFarmApy);    // market farm APY (min)
+console.log(farmDetails.maxFarmApy);    // max farm APY (with booster)
+console.log(farmDetails.tokenNetRewards); // reward token metadata
+console.log(farmDetails.canBeBooster);  // whether asset can be boosted
+console.log(farmDetails.supplyApy);     // supply APR (%)
+console.log(farmDetails.borrowApy);    // borrow APR (%)
+```
+
 ### Cross-chain Withdraw Rewards
 
 ```typescript
@@ -882,6 +909,7 @@ if (res.status === "success") {
 - `getPrices` - Get price information
 - `getBalance` - Get balance
 - `getFarms` - Get liquidity mining information
+- `getFarmDetailsOfAsset` - Get farm details (APY, rewards, canBeBooster) for an asset
 - `getConfig` - Get configuration
 - `getBoosterTokens` - Get booster token information
 - `getTokenDetail` - Get token details
