@@ -163,11 +163,13 @@ The following steps describe how to create a multi-chain account:
 import type {
   IChain,
   IIntentsQuoteResult,
+  Asset,
 } from "@rhea-finance/cross-chain-sdk";
 import {
   format_wallet,
   serializationObj,
   getCreateMcaCustomRecipientMsg,
+  getCreateMcaFeeData,
   intentsQuotation,
   prepare_sign_message_evm,
   process_signature_evm,
@@ -200,7 +202,19 @@ const customRecipientMsg = getCreateMcaCustomRecipientMsg({
   signedMessages: [signedMessage],
 });
 
-// Step 4: Get intents quote to obtain depositAddress
+// Step 4: Get create MCA fee data
+// Get the on-chain fee for creating an MCA account
+// Parameters:
+//   asset: The Asset object
+//   bufferMultiple: Optional buffer multiplier (default 1.05)
+const mcaFee = await getCreateMcaFeeData({
+  asset: asset,
+  bufferMultiple: 1.05, // optional, default 1.05
+});
+// mcaFee.amountRaw     - fee amount with token precision (for contract calls)
+// mcaFee.amountReadable - human-readable fee amount
+
+// Step 5: Get intents quote to obtain depositAddress
 const res_quote: IIntentsQuoteResult = await intentsQuotation({
   originAsset: "nep141:xxx",
   destinationAsset: "nep141:xxx",
@@ -213,8 +227,18 @@ const res_quote: IIntentsQuoteResult = await intentsQuotation({
   customRecipientMsg: customRecipientMsg,
 });
 
-// Step 5: Get depositAddress and transfer funds to complete MCA creation
+// Step 6: Get depositAddress and transfer funds to complete MCA creation
 const depositAddress = res_quote.quoteSuccessResult?.quote?.depositAddress;
+
+// Step 7: Calculate total fee
+// Total fee = MCA creation fee + intents quotation fee (cross-chain bridge/swap fee)
+// quoteFeeData is returned by intentsQuotation when quoteStatus is "success"
+//   quoteFeeData.feeAmount - bridge/swap fee amount (readable)
+//   quoteFeeData.feeUsd    - bridge/swap fee in USD
+const quoteFee = res_quote.quoteFeeData;
+// Total fee (readable) = mcaFee.amountReadable + quoteFee.feeAmount
+// Total fee (USD)       = mcaFee amount in USD  + quoteFee.feeUsd
+
 // Transfer funds to depositAddress using your wallet
 ```
 
@@ -307,6 +331,11 @@ const result = await getSupplyDepositData({
 // Transfer to depositAddress to complete Supply
 const depositAddress = result.depositAddress;
 // result also contains quoteResult's full quote data
+
+// quoteFeeData - cross-chain bridge/swap fee (present when quote succeeds)
+const quoteFeeData = result.quoteResult?.quoteFeeData;
+// quoteFeeData.feeAmount - bridge/swap fee amount (readable)
+// quoteFeeData.feeUsd    - bridge/swap fee in USD
 ```
 
 ### Cross-chain Repay
@@ -436,6 +465,11 @@ const { businessMap, quoteResult } = await prepareBusinessDataOnWithdraw({
   isDecrease: false,
   decreaseCollateralAmoun,
 });
+
+// quoteFeeData - cross-chain bridge/swap fee (present when quote succeeds)
+const quoteFeeData = quoteResult?.quoteFeeData;
+// quoteFeeData.feeAmount - bridge/swap fee amount (readable)
+// quoteFeeData.feeUsd    - bridge/swap fee in USD
 
 const wallet = format_wallet({ chain, identityKey });
 const signedBusiness = await sign_message({
@@ -938,6 +972,7 @@ if (res.status === "success") {
 
 **MCA Creation**
 - `getCreateMcaCustomRecipientMsg` - Get custom recipient message for creating MCA
+- `getCreateMcaFeeData` - Get the on-chain fee for creating an MCA account. Returns `{ amountRaw, amountReadable }`. Parameters: `asset` (Asset object), `bufferMultiple` (optional, default 1.5)
 - `getZcashCreateMcaDepositAddress` - Get deposit address when creating MCA with Zcash (Old way)
 - `getZcashResponseDataByAddress` - Get Zcash deposit/creation data by address (Old way)
 
@@ -952,6 +987,14 @@ if (res.status === "success") {
 - `prepareBusinessDataOnClaim` - Prepare claim rewards business data
 - `prepareBusinessDataOnWithdrawRewards` - Prepare cross-chain withdraw rewards business data
 
+
+**Intents Quotation**
+- `intentsQuotation` - Get cross-chain swap/bridge quote. Returns `IIntentsQuoteResult` which includes:
+  - `quoteStatus` - `"success"` or `"error"`
+  - `quoteSuccessResult` - Quote details (depositAddress, amounts, etc.)
+  - `quoteFeeData` - Fee data for the cross-chain bridge/swap (only present when `quoteStatus` is `"success"`):
+    - `feeAmount` - Bridge/swap fee amount (readable, = amountInFormatted - amountOutFormatted)
+    - `feeUsd` - Bridge/swap fee in USD (= amountInUsd - amountOutUsd)
 
 **General Utilities**
 - `format_wallet` - Format wallet address

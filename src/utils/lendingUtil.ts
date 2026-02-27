@@ -6,11 +6,13 @@ import {
   IUnclaimedRewardItem,
   IGasData,
   IGetSimpleWithdrawDataParams,
+  Asset,
 } from "../types";
 import { toReadableNumber } from "./numbers";
 // @ts-ignore
 import { omit } from "ramda";
 import { getMultichainLendingConfig } from "../view/centralized_api";
+import { getCreateMcaFeePaged, getNearValuesPaged } from "../view/am";
 import { computeRelayerGas } from "../other/computeRelayerGas";
 
 export const hasZeroSharesFarmRewards = (farms: IFarm[]): boolean => {
@@ -105,4 +107,32 @@ export async function getSimpleWithdrawData(
     result.simpleWithdrawData.relayerId = result_relayer;
   }
   return result;
+}
+
+export async function getCreateMcaFeeData({
+  bufferMultiple = 1.05,
+  asset,
+}: {
+  bufferMultiple?: number;
+  asset: Asset;
+}) {
+  const feeList = await getCreateMcaFeePaged();
+  const nearValueList = await getNearValuesPaged();
+
+  const tokenId = asset.token_id;
+  const mcaFee = feeList[tokenId] || "0";
+  const nearValue = nearValueList[tokenId] || "0";
+
+  const totalFee = Big(mcaFee)
+    .plus(Big(nearValue).mul(0.1))
+    .toFixed(0, Big.roundDown);
+
+  const decimals = asset.metadata?.decimals ?? 0;
+  const amountRaw = Big(totalFee).mul(bufferMultiple).toFixed(0, Big.roundDown);
+  const amountReadable = toReadableNumber(decimals, amountRaw);
+
+  return {
+    amountRaw,
+    amountReadable,
+  };
 }

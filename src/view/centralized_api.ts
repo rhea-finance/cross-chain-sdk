@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { config_near } from "../config/config";
 import {
   IRelayerResult,
@@ -7,6 +8,7 @@ import {
   IIntentsQuoteResult,
   QuotationParams,
 } from "../types/index";
+import { bignumber } from "mathjs";
 const { oneClickUrl, indexUrl, findPathUrl } = config_near;
 let _signatureCache: { key: CryptoKey; raw: Uint8Array } | null = null;
 
@@ -271,9 +273,19 @@ export async function fetchIntentsQuotation(
     });
     const quote = response?.quote;
     if (quote) {
+      const feeAmountBig = new Big(quote?.amountInFormatted || 0).minus(
+        quote?.amountOutFormatted || 0
+      );
+      const feeUsdBig = new Big(quote?.amountInUsd || 0).minus(
+        quote?.amountOutUsd || 0
+      );
       return {
         quoteStatus: "success",
         quoteSuccessResult: response,
+        quoteFeeData: {
+          feeAmount: feeAmountBig.gt(0) ? feeAmountBig.toFixed() : "0",
+          feeUsd: feeUsdBig.gt(0) ? feeUsdBig.toFixed() : "0",
+        },
       };
     } else {
       return {

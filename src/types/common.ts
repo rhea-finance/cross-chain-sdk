@@ -62,6 +62,10 @@ export interface IIntentsQuoteResult {
   quoteStatus: "success" | "error";
   quoteSuccessResult?: IIntentsQuote;
   message?: string;
+  quoteFeeData?: {
+    feeAmount: string;
+    feeUsd: string;
+  };
 }
 
 export interface IExecutionResult {
