@@ -254,7 +254,7 @@ export async function fetchIntentsQuotation(
       refundType: "ORIGIN_CHAIN",
       recipientType: "DESTINATION_CHAIN",
       depositType: "ORIGIN_CHAIN",
-      deadline: new Date(Date.now() + 10000 * 60 * 60 * 1000).toISOString(),
+      deadline: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
       referral: "rhea",
       quoteWaitingTimeMs: 3000,
       slippageTolerance:
