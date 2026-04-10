@@ -10,6 +10,18 @@ export interface LsdMetadata {
   acc_protocol_fee: string;
 }
 
+export interface BurrowAsset {
+  token_id: string;
+  supplied: {
+    shares: string;
+    balance: string;
+  };
+  borrowed: {
+    shares: string;
+    balance: string;
+  };
+}
+
 export interface LsdBalances {
   usdt: string;
   lsdUsdt: string;
