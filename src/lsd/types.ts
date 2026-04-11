@@ -1,3 +1,4 @@
+import type { IIntentSwapDetails } from "../types/chains";
 import type { IIntentsQuoteResult, IStatus } from "../types/common";
 
 export interface LsdMetadata {
@@ -27,6 +28,11 @@ export interface LsdBalances {
   lsdUsdt: string;
 }
 
+export interface LsdBalancesParams {
+  accountAddress?: string;
+  rpcUrl?: string;
+}
+
 export interface LsdPreparedTransfer {
   chain: "bsc";
   chainId: string;
@@ -35,6 +41,28 @@ export interface LsdPreparedTransfer {
   decimals: number;
   amount: string;
   depositAddress: string;
+}
+
+export interface LsdIntentsDepositAddresses {
+  originDepositAddress: string;
+  returnDepositAddress: string;
+}
+
+export type LsdIntentsTransactionStatus =
+  | "success"
+  | "refunded"
+  | "failed"
+  | "not_started";
+
+export interface LsdIntentsTransactionStatusResult {
+  depositAddress: string;
+  status: LsdIntentsTransactionStatus;
+  swapDetails?: IIntentSwapDetails;
+}
+
+export interface LsdIntentsTransactionStatusesResult {
+  origin: LsdIntentsTransactionStatusResult;
+  return: LsdIntentsTransactionStatusResult;
 }
 
 export type LsdPreparationStage =
@@ -60,6 +88,7 @@ export interface LsdPrepareResult {
   status: IStatus;
   stage: LsdPreparationStage;
   depositAddress?: string;
+  intentsDepositAddresses?: LsdIntentsDepositAddresses;
   quote?: LsdIntentsQuote;
   transferData?: LsdPreparedTransfer;
   message?: string;

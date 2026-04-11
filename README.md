@@ -915,6 +915,143 @@ if (res.status === "success") {
 }
 ```
 
+### LSD Intents Supply and Withdraw
+
+The LSD module prepares the two-leg Intents route used by the LSD page in the demo project:
+
+- Supply: BSC USDT -> NEAR USDT -> LSD -> BSC lsdUSDT
+- Withdraw: BSC lsdUSDT -> NEAR LSD -> USDT -> BSC USDT
+
+The SDK prepares quotes and transfer data, but it does not send EVM wallet transactions. Your app should use its own wallet integration to transfer the returned token amount to the returned `depositAddress`.
+
+```typescript
+import {
+  BSC_CHAIN_ID,
+  getLsdBalances,
+  pollLsdIntentsTransactionStatuses,
+  prepareLsdSupplyByIntents,
+  prepareLsdWithdrawByIntents,
+  quoteLsdSupplyByIntents,
+  quoteLsdWithdrawByIntents,
+} from "@rhea-finance/cross-chain-sdk";
+
+// This is app-side wallet code, not provided by the SDK.
+async function transferToken(params: {
+  tokenAddress: string;
+  depositAddress: string;
+  chain: "bsc";
+  amount: string;
+}) {
+  // Example:
+  // await erc20Contract.transfer(params.depositAddress, params.amount);
+}
+
+const accountAddress = "0x...";
+
+// Optional: pass your own BSC RPC if the default RPC is unstable.
+const balances = await getLsdBalances({
+  accountAddress,
+  rpcUrl: "https://your-bsc-rpc.example",
+});
+console.log(balances.usdt);
+console.log(balances.lsdUsdt);
+
+// Quote supply. Amounts are human-readable strings.
+const supplyQuote = await quoteLsdSupplyByIntents({
+  accountAddress,
+  amount: "100",
+});
+console.log(supplyQuote.estimatedReceive);
+console.log(supplyQuote.bridgeFeeUsd);
+
+// Prepare supply transfer data.
+const preparedSupply = await prepareLsdSupplyByIntents({
+  accountAddress,
+  amount: "100",
+  onStatusChange(stage) {
+    console.log("Supply prepare stage:", stage);
+  },
+});
+
+if (preparedSupply.status !== "success" || !preparedSupply.transferData) {
+  throw new Error(preparedSupply.message || "Failed to prepare LSD supply");
+}
+
+await transferToken({
+  tokenAddress: preparedSupply.transferData.tokenAddress,
+  depositAddress: preparedSupply.transferData.depositAddress,
+  chain: preparedSupply.transferData.chain,
+  amount: preparedSupply.transferData.amount,
+});
+
+if (!preparedSupply.intentsDepositAddresses) {
+  throw new Error("Missing Intents deposit addresses");
+}
+
+const supplyStatuses = await pollLsdIntentsTransactionStatuses({
+  originDepositAddress:
+    preparedSupply.intentsDepositAddresses.originDepositAddress,
+  returnDepositAddress:
+    preparedSupply.intentsDepositAddresses.returnDepositAddress,
+});
+
+if (
+  supplyStatuses.origin.status !== "success" ||
+  supplyStatuses.return.status !== "success"
+) {
+  throw new Error(
+    `LSD supply failed: origin=${supplyStatuses.origin.status}, return=${supplyStatuses.return.status}`
+  );
+}
+
+// Quote withdraw.
+const withdrawQuote = await quoteLsdWithdrawByIntents({
+  accountAddress,
+  amount: "50",
+});
+console.log(withdrawQuote.estimatedReceive);
+console.log(withdrawQuote.bridgeFeeUsd);
+
+// Prepare withdraw transfer data.
+const preparedWithdraw = await prepareLsdWithdrawByIntents({
+  accountAddress,
+  amount: "50",
+});
+
+if (preparedWithdraw.status !== "success" || !preparedWithdraw.transferData) {
+  throw new Error(
+    preparedWithdraw.message || "Failed to prepare LSD withdraw"
+  );
+}
+
+await transferToken({
+  tokenAddress: preparedWithdraw.transferData.tokenAddress,
+  depositAddress: preparedWithdraw.transferData.depositAddress,
+  chain: preparedWithdraw.transferData.chain,
+  amount: preparedWithdraw.transferData.amount,
+});
+
+if (!preparedWithdraw.intentsDepositAddresses) {
+  throw new Error("Missing Intents deposit addresses");
+}
+
+const withdrawStatuses = await pollLsdIntentsTransactionStatuses({
+  originDepositAddress:
+    preparedWithdraw.intentsDepositAddresses.originDepositAddress,
+  returnDepositAddress:
+    preparedWithdraw.intentsDepositAddresses.returnDepositAddress,
+});
+
+if (
+  withdrawStatuses.origin.status !== "success" ||
+  withdrawStatuses.return.status !== "success"
+) {
+  throw new Error(
+    `LSD withdraw failed: origin=${withdrawStatuses.origin.status}, return=${withdrawStatuses.return.status}`
+  );
+}
+```
+
 ## Core API
 
 ### Actions

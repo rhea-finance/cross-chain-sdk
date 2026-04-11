@@ -6,7 +6,7 @@ import {
   BSC_USDT_DECIMALS,
   LSD_USDT_DECIMALS,
 } from "./constants";
-import type { LsdBalances } from "./types";
+import type { LsdBalances, LsdBalancesParams } from "./types";
 
 const ERC20_BALANCE_OF_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
@@ -16,10 +16,11 @@ async function getBscTokenBalance(params: {
   accountAddress: string;
   tokenAddress: string;
   decimals: number;
+  rpcUrl?: string;
 }): Promise<string> {
   try {
     const provider = new ethers.providers.JsonRpcProvider(
-      config_evm.chains.bsc.rpcUrl
+      params.rpcUrl || config_evm.chains.bsc.rpcUrl
     );
     const contract = new ethers.Contract(
       params.tokenAddress,
@@ -35,9 +36,9 @@ async function getBscTokenBalance(params: {
   }
 }
 
-export async function getLsdBalances(params: {
-  accountAddress?: string;
-}): Promise<LsdBalances> {
+export async function getLsdBalances(
+  params: LsdBalancesParams
+): Promise<LsdBalances> {
   if (!params.accountAddress) {
     return {
       usdt: "0",
@@ -50,11 +51,13 @@ export async function getLsdBalances(params: {
       accountAddress: params.accountAddress,
       tokenAddress: BSC_USDT_ADDRESS,
       decimals: BSC_USDT_DECIMALS,
+      rpcUrl: params.rpcUrl,
     }),
     getBscTokenBalance({
       accountAddress: params.accountAddress,
       tokenAddress: BSC_LSD_USDT_ADDRESS,
       decimals: LSD_USDT_DECIMALS,
+      rpcUrl: params.rpcUrl,
     }),
   ]);
 

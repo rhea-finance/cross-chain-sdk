@@ -18,6 +18,7 @@ import {
 } from "./constants";
 import { calculateLsdFromUsdt, calculateUsdtFromLsd } from "./view";
 import type {
+  LsdIntentsTransactionStatusesResult,
   LsdIntentsQuote,
   LsdPreparationStage,
   LsdPrepareParams,
@@ -347,6 +348,10 @@ export async function prepareLsdSupplyByIntents(
       status: "success",
       stage: "completed",
       depositAddress: finalQuoteData.depositAddress,
+      intentsDepositAddresses: {
+        originDepositAddress: finalQuoteData.depositAddress,
+        returnDepositAddress: secondQuoteData.depositAddress,
+      },
       quote,
       transferData,
     };
@@ -440,6 +445,10 @@ export async function prepareLsdWithdrawByIntents(
       status: "success",
       stage: "completed",
       depositAddress: finalQuoteData.depositAddress,
+      intentsDepositAddresses: {
+        originDepositAddress: finalQuoteData.depositAddress,
+        returnDepositAddress: secondQuoteData.depositAddress,
+      },
       quote,
       transferData,
     };
@@ -462,4 +471,50 @@ export async function pollLsdIntentsTransactionStatus(params: {
   }
 
   return pollingTransactionStatus(params.depositAddress);
+}
+
+export async function pollLsdIntentsTransactionStatuses(params: {
+  originDepositAddress: string;
+  returnDepositAddress: string;
+}): Promise<LsdIntentsTransactionStatusesResult> {
+  if (!params.originDepositAddress) {
+    throw new Error("originDepositAddress is required");
+  }
+
+  if (!params.returnDepositAddress) {
+    throw new Error("returnDepositAddress is required");
+  }
+
+  const origin = await pollingTransactionStatus(params.originDepositAddress);
+
+  if (origin.status !== "success") {
+    return {
+      origin: {
+        depositAddress: params.originDepositAddress,
+        status: origin.status,
+        swapDetails: origin.swapDetails,
+      },
+      return: {
+        depositAddress: params.returnDepositAddress,
+        status: "not_started",
+      },
+    };
+  }
+
+  const returnBridge = await pollingTransactionStatus(
+    params.returnDepositAddress
+  );
+
+  return {
+    origin: {
+      depositAddress: params.originDepositAddress,
+      status: origin.status,
+      swapDetails: origin.swapDetails,
+    },
+    return: {
+      depositAddress: params.returnDepositAddress,
+      status: returnBridge.status,
+      swapDetails: returnBridge.swapDetails,
+    },
+  };
 }
