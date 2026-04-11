@@ -15,9 +15,6 @@ export const NEAR_USDT_DECIMALS = 6;
 export const BSC_USDT_INTENTS_ASSET_ID =
   "nep245:v2_1.omni.hot.tg:56_2CMMyVTGZkeyNZTSvS5sarzfir6g";
 export const NEAR_USDT_INTENTS_ASSET_ID = "nep141:usdt.tether-token.near";
-// TODOXXXX: Set the correct asset IDs for the NRUSDT intents
 export const BSC_NRUSDT_INTENTS_ASSET_ID =
-  "TODO_SET_BSC_NRUSDT_INTENTS_ASSET_ID";
-// TODOXXXX: Set the correct asset IDs for the NRUSDT intents
-export const NEAR_NRUSDT_INTENTS_ASSET_ID =
-  "TODO_SET_NEAR_NRUSDT_INTENTS_ASSET_ID";
+  "1cs_v1:bsc:bep20:0x5382555840ef9f54ef6d3ee5da60f12bcabf4b87";
+export const NEAR_NRUSDT_INTENTS_ASSET_ID = "nep141:lsd-usdt.rhealab.near";

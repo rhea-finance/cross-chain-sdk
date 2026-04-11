@@ -27,12 +27,20 @@ export interface LsdBalances {
   lsdUsdt: string;
 }
 
-export type LsdExecutionStage =
+export interface LsdPreparedTransfer {
+  chain: "bsc";
+  chainId: string;
+  tokenAddress: string;
+  tokenSymbol: "USDT" | "lsdUSDT";
+  decimals: number;
+  amount: string;
+  depositAddress: string;
+}
+
+export type LsdPreparationStage =
   | "quoting_origin"
   | "calculating_lsd"
   | "quoting_return"
-  | "transferring"
-  | "polling"
   | "completed"
   | "failed";
 
@@ -48,12 +56,19 @@ export interface LsdIntentsQuote {
   secondQuote?: IIntentsQuoteResult;
 }
 
-export interface LsdExecutionResult {
+export interface LsdPrepareResult {
   status: IStatus;
-  stage: LsdExecutionStage;
-  txHash?: string;
+  stage: LsdPreparationStage;
   depositAddress?: string;
-  finalStatus?: "success" | "refunded" | "failed";
   quote?: LsdIntentsQuote;
+  transferData?: LsdPreparedTransfer;
   message?: string;
+}
+
+export interface LsdPrepareParams {
+  accountAddress: string;
+  amount: string;
+  dry?: boolean;
+  slippageTolerance?: number;
+  onStatusChange?: (stage: LsdPreparationStage) => void;
 }

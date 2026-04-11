@@ -44,7 +44,9 @@ export async function getBurrowAsset(
   return result as BurrowAsset;
 }
 
-export async function calculateLsdFromUsdt(usdtAmount: string): Promise<string> {
+export async function calculateLsdFromUsdt(
+  usdtAmount: string
+): Promise<string> {
   const [metadata, totalSupply, asset] = await Promise.all([
     getLsdMetadata(),
     getLsdTotalSupply(),
