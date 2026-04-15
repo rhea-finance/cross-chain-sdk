@@ -7,8 +7,9 @@ import {
   LSD_CONTRACT_ID,
   LSD_USDT_DECIMALS,
   NEAR_USDT_ADDRESS,
+  NEAR_USDT_DECIMALS,
 } from "./constants";
-import type { BurrowAsset, LsdMetadata } from "./types";
+import type { BurrowAsset, LsdAmountConversion, LsdMetadata } from "./types";
 
 export async function getLsdMetadata(): Promise<LsdMetadata> {
   const result = await view_on_near({
@@ -46,7 +47,7 @@ export async function getBurrowAsset(
 
 export async function calculateLsdFromUsdt(
   usdtAmount: string
-): Promise<string> {
+): Promise<LsdAmountConversion> {
   const [metadata, totalSupply, asset] = await Promise.all([
     getLsdMetadata(),
     getLsdTotalSupply(),
@@ -59,14 +60,21 @@ export async function calculateLsdFromUsdt(
     .times(asset.supplied.shares)
     .div(asset.supplied.balance);
 
-  return burrowSharesAmount
+  const lsdAmount = burrowSharesAmount
     .times(totalSupply)
     .div(metadata.underlying_burrowland_shares)
     .round(0, Big.roundUp)
     .toFixed(0);
+
+  return {
+    readableAmount: toReadableNumber(LSD_USDT_DECIMALS, lsdAmount),
+    amount: lsdAmount,
+  };
 }
 
-export async function calculateUsdtFromLsd(lsdAmount: string): Promise<string> {
+export async function calculateUsdtFromLsd(
+  lsdAmount: string
+): Promise<LsdAmountConversion> {
   const [metadata, totalSupply, asset] = await Promise.all([
     getLsdMetadata(),
     getLsdTotalSupply(),
@@ -84,6 +92,10 @@ export async function calculateUsdtFromLsd(lsdAmount: string): Promise<string> {
     .div(asset.supplied.shares)
     .round(0, Big.roundDown)
     .toFixed(0);
+  const readableUsdtAmount = toReadableNumber(BSC_USDT_DECIMALS, usdtAmountRaw);
 
-  return toReadableNumber(BSC_USDT_DECIMALS, usdtAmountRaw);
+  return {
+    readableAmount: readableUsdtAmount,
+    amount: toNonDivisibleNumber(NEAR_USDT_DECIMALS, readableUsdtAmount),
+  };
 }

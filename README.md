@@ -927,6 +927,8 @@ The SDK prepares quotes and transfer data, but it does not send EVM wallet trans
 ```typescript
 import {
   BSC_CHAIN_ID,
+  calculateLsdFromUsdt,
+  calculateUsdtFromLsd,
   getLsdBalances,
   pollLsdIntentsTransactionStatuses,
   prepareLsdSupplyByIntents,
@@ -955,6 +957,15 @@ const balances = await getLsdBalances({
 });
 console.log(balances.usdt);
 console.log(balances.lsdUsdt);
+
+// Exchange conversion helpers return both readable and raw values.
+const lsdFromUsdt = await calculateLsdFromUsdt("100");
+console.log(lsdFromUsdt.readableAmount); // readable lsdUSDT amount for display
+console.log(lsdFromUsdt.amount); // raw lsdUSDT amount with token precision
+
+const usdtFromLsd = await calculateUsdtFromLsd("50");
+console.log(usdtFromLsd.readableAmount); // readable USDT amount for display
+console.log(usdtFromLsd.amount); // raw NEAR USDT amount for Intents quote
 
 // Quote supply. Amounts are human-readable strings.
 const supplyQuote = await quoteLsdSupplyByIntents({

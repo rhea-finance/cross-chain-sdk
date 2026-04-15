@@ -33,6 +33,11 @@ export interface LsdBalancesParams {
   rpcUrl?: string;
 }
 
+export interface LsdAmountConversion {
+  readableAmount: string;
+  amount: string;
+}
+
 export interface LsdPreparedTransfer {
   chain: "bsc";
   chainId: string;

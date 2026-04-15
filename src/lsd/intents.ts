@@ -200,7 +200,7 @@ export async function quoteLsdSupplyByIntents(
   const lsdAmount = await calculateLsdFromUsdt(nearUsdtReadable);
 
   const secondQuote = await quoteNearLsdToBscLsd({
-    amount: lsdAmount,
+    amount: lsdAmount.amount,
     refundTo: LSD_CONTRACT_ID,
     recipient: params.accountAddress,
     dry: params.dry,
@@ -216,7 +216,7 @@ export async function quoteLsdSupplyByIntents(
     bridgeFeeUsd: sumBridgeFeeUsd(firstQuote, secondQuote),
     inputToken: "USDT",
     outputToken: "lsdUSDT",
-    intermediateAmount: lsdAmount,
+    intermediateAmount: lsdAmount.amount,
     firstQuote,
     secondQuote,
   };
@@ -248,7 +248,7 @@ export async function quoteLsdWithdrawByIntents(
   const usdtAmount = await calculateUsdtFromLsd(nearLsdReadable);
 
   const secondQuote = await quoteNearUsdtToBscUsdt({
-    amount: usdtAmount,
+    amount: usdtAmount.amount,
     refundTo: LSD_CONTRACT_ID,
     recipient: params.accountAddress,
     dry: params.dry,
@@ -266,7 +266,7 @@ export async function quoteLsdWithdrawByIntents(
     bridgeFeeUsd: sumBridgeFeeUsd(firstQuote, secondQuote),
     inputToken: "lsdUSDT",
     outputToken: "USDT",
-    intermediateAmount: usdtAmount,
+    intermediateAmount: usdtAmount.amount,
     firstQuote,
     secondQuote,
   };
@@ -302,7 +302,7 @@ export async function prepareLsdSupplyByIntents(
 
     emitStage("quoting_return", params.onStatusChange);
     const secondQuote = await quoteNearLsdToBscLsd({
-      amount: lsdAmount,
+      amount: lsdAmount.amount,
       refundTo: LSD_CONTRACT_ID,
       recipient: params.accountAddress,
       dry: params.dry,
@@ -330,7 +330,7 @@ export async function prepareLsdSupplyByIntents(
       bridgeFeeUsd: sumBridgeFeeUsd(firstQuote, secondQuote),
       inputToken: "USDT",
       outputToken: "lsdUSDT",
-      intermediateAmount: lsdAmount,
+      intermediateAmount: lsdAmount.amount,
       firstQuote,
       secondQuote,
     };
@@ -399,7 +399,7 @@ export async function prepareLsdWithdrawByIntents(
 
     emitStage("quoting_return", params.onStatusChange);
     const secondQuote = await quoteNearUsdtToBscUsdt({
-      amount: usdtAmount,
+      amount: usdtAmount.amount,
       refundTo: LSD_CONTRACT_ID,
       recipient: params.accountAddress,
       dry: params.dry,
@@ -427,7 +427,7 @@ export async function prepareLsdWithdrawByIntents(
       bridgeFeeUsd: sumBridgeFeeUsd(firstQuote, secondQuote),
       inputToken: "lsdUSDT",
       outputToken: "USDT",
-      intermediateAmount: usdtAmount,
+      intermediateAmount: usdtAmount.amount,
       firstQuote,
       secondQuote,
     };

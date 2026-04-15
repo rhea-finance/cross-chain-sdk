@@ -55,23 +55,12 @@ export const toReadableNumber = (
   if (!decimals) return number;
   if (!number) return "0";
 
-  // Remove any non-digit characters
-  const digitsOnly = number.replace(/[^\d]/g, "");
-  if (!digitsOnly || digitsOnly === "0") return "0";
-
-  // Handle case where number length is less than or equal to decimals
-  if (digitsOnly.length <= decimals) {
-    const fractionStr = digitsOnly.padStart(decimals, "0");
-    return `0.${fractionStr}`.replace(/\.?0+$/, "") || "0";
-  }
-
-  // CRITICAL: Preserve ALL decimal digits, not just up to decimals
-  // If the original number had more decimal places than 'decimals', keep all of them
-  const wholeStr = digitsOnly.substring(0, digitsOnly.length - decimals) || "0";
-  // Get ALL remaining digits (not just 'decimals' length) to preserve precision
-  const fractionStr = digitsOnly.substring(digitsOnly.length - decimals);
-
-  return `${wholeStr}.${fractionStr}`.replace(/\.?0+$/, "") || "0";
+  const wholeStr = number.substring(0, number.length - decimals) || "0";
+  const fractionStr = number
+    .substring(number.length - decimals)
+    .padStart(decimals, "0")
+    .substring(0, decimals);
+  return `${wholeStr}.${fractionStr}`.replace(/\.?0+$/, "");
 };
 
 export const toNonDivisibleNumber = (
@@ -80,14 +69,7 @@ export const toNonDivisibleNumber = (
 ): string => {
   if (decimals === null || decimals === undefined) return number;
   const [wholePart, fracPart = ""] = number.split(".");
-  let processedFracPart: string;
-  if (fracPart.length >= decimals) {
-    processedFracPart = fracPart;
-  } else {
-    processedFracPart = fracPart.padEnd(decimals, "0");
-  }
-  const res = `${wholePart}${processedFracPart}`
+  return `${wholePart}${fracPart.padEnd(decimals, "0").slice(0, decimals)}`
     .replace(/^0+/, "")
     .padStart(1, "0");
-  return new Decimal(res).toFixed(0, Decimal.ROUND_DOWN);
 };
