@@ -5,6 +5,7 @@ import {
   IIntentItem,
   IStatus,
   IIntentSwapDetails,
+  IntentsOrdersParams,
   IIntentsQuoteResult,
   QuotationParams,
 } from "../types/index";
@@ -238,30 +239,60 @@ export async function get_tx_id(receipt_id: string) {
     return {};
   }
 }
+
+const INTENTS_ORDER_API_URL = `${indexUrl}/api/1click`;
+
+function buildIntentsQuoteRequest(params: QuotationParams) {
+  return {
+    originAsset: params?.originAsset,
+    destinationAsset: params?.destinationAsset,
+    amount: params?.amount,
+    refundTo: params?.refundTo,
+    recipient: params?.recipient,
+    customRecipientMsg: params?.customRecipientMsg,
+    dry: params?.dry || false,
+    swapType: params.isReverse ? "EXACT_OUTPUT" : "EXACT_INPUT",
+    refundType: "ORIGIN_CHAIN",
+    recipientType: "DESTINATION_CHAIN",
+    depositType: "ORIGIN_CHAIN",
+    deadline: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
+    referral: "rhea",
+    quoteWaitingTimeMs: 3000,
+    slippageTolerance:
+      typeof params.slippageTolerance == "number" ? params.slippageTolerance : 50,
+  };
+}
+
+function normalizeIntentsQuoteResponse(response: any): IIntentsQuoteResult {
+  const quote = response?.quote;
+  if (quote) {
+    const feeAmountBig = new Big(quote?.amountInFormatted || 0).minus(
+      quote?.amountOutFormatted || 0
+    );
+    const feeUsdBig = new Big(quote?.amountInUsd || 0).minus(
+      quote?.amountOutUsd || 0
+    );
+    return {
+      quoteStatus: "success",
+      quoteSuccessResult: response,
+      quoteFeeData: {
+        feeAmount: feeAmountBig.gt(0) ? feeAmountBig.toFixed() : "0",
+        feeUsd: feeUsdBig.gt(0) ? feeUsdBig.toFixed() : "0",
+      },
+    };
+  }
+
+  return {
+    quoteStatus: "error",
+    message: response?.message || response?.error,
+  };
+}
+
 export async function fetchIntentsQuotation(
   params: QuotationParams
 ): Promise<IIntentsQuoteResult> {
   try {
-    const res_params = {
-      originAsset: params?.originAsset,
-      destinationAsset: params?.destinationAsset,
-      amount: params?.amount,
-      refundTo: params?.refundTo,
-      recipient: params?.recipient,
-      customRecipientMsg: params?.customRecipientMsg,
-      dry: params?.dry || false,
-      swapType: params.isReverse ? "EXACT_OUTPUT" : "EXACT_INPUT",
-      refundType: "ORIGIN_CHAIN",
-      recipientType: "DESTINATION_CHAIN",
-      depositType: "ORIGIN_CHAIN",
-      deadline: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
-      referral: "rhea",
-      quoteWaitingTimeMs: 3000,
-      slippageTolerance:
-        typeof params.slippageTolerance == "number"
-          ? params.slippageTolerance
-          : 50,
-    };
+    const res_params = buildIntentsQuoteRequest(params);
     const response: any = await fetch(`${oneClickUrl}/quote`, {
       method: "POST",
       headers: {
@@ -271,33 +302,69 @@ export async function fetchIntentsQuotation(
     }).then((res) => {
       return res.json();
     });
-    const quote = response?.quote;
-    if (quote) {
-      const feeAmountBig = new Big(quote?.amountInFormatted || 0).minus(
-        quote?.amountOutFormatted || 0
-      );
-      const feeUsdBig = new Big(quote?.amountInUsd || 0).minus(
-        quote?.amountOutUsd || 0
-      );
-      return {
-        quoteStatus: "success",
-        quoteSuccessResult: response,
-        quoteFeeData: {
-          feeAmount: feeAmountBig.gt(0) ? feeAmountBig.toFixed() : "0",
-          feeUsd: feeUsdBig.gt(0) ? feeUsdBig.toFixed() : "0",
-        },
-      };
-    } else {
-      return {
-        quoteStatus: "error",
-        message: response?.message,
-      };
-    }
+    return normalizeIntentsQuoteResponse(response);
   } catch (error: any) {
     return {
       quoteStatus: "error",
       message: error?.message || error?.error,
     };
+  }
+}
+
+export async function fetchIntentsCreateOrder(
+  params: QuotationParams
+): Promise<IIntentsQuoteResult> {
+  try {
+    const res_params = buildIntentsQuoteRequest(params);
+    const response: any = await fetch(`${INTENTS_ORDER_API_URL}/create-order`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify(res_params),
+    }).then((res) => {
+      return res.json();
+    });
+
+    return normalizeIntentsQuoteResponse(response);
+  } catch (error: any) {
+    return {
+      quoteStatus: "error",
+      message: error?.message || error?.error,
+    };
+  }
+}
+
+export async function fetchIntentsOrders(params: IntentsOrdersParams) {
+  try {
+    const searchParams = new URLSearchParams({
+      refund_to: params.refundTo,
+    });
+
+    if (typeof params.pageNumber === "number") {
+      searchParams.set("page_number", String(params.pageNumber));
+    }
+
+    if (typeof params.pageSize === "number") {
+      searchParams.set("page_size", String(params.pageSize));
+    }
+
+    const response = await fetch(
+      `${INTENTS_ORDER_API_URL}/orders?${searchParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      }
+    ).then((res) => {
+      return res.json();
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error fetchIntentsOrders:", error);
+    return null;
   }
 }
 

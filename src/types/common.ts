@@ -23,6 +23,12 @@ export interface QuotationParams {
   slippageTolerance?: number;
 }
 
+export interface IntentsOrdersParams {
+  refundTo: string;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
 export interface IIntentsQuote {
   quote: {
     amountIn: string;

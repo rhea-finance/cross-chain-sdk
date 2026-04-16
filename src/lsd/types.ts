@@ -1,5 +1,5 @@
 import type { IIntentSwapDetails } from "../types/chains";
-import type { IIntentsQuoteResult, IStatus } from "../types/common";
+import type { IIntentsQuote, IIntentsQuoteResult, IStatus } from "../types/common";
 
 export interface LsdMetadata {
   underlying_token_id: string;
@@ -105,4 +105,28 @@ export interface LsdPrepareParams {
   dry?: boolean;
   slippageTolerance?: number;
   onStatusChange?: (stage: LsdPreparationStage) => void;
+}
+
+export interface LsdIntentsOrdersParams {
+  accountId: string;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface LsdIntentsOrderRecord {
+  timestamp?: string;
+  status: string;
+  quoteRequest: Pick<
+    IIntentsQuote["quoteRequest"],
+    "originAsset" | "destinationAsset" | "recipient" | "refundTo" | "customRecipientMsg"
+  >;
+  quote: IIntentsQuote["quote"];
+}
+
+export interface LsdIntentsOrdersResult {
+  page_number: number;
+  page_size: number;
+  total_page: number;
+  total_size: number;
+  record_list: LsdIntentsOrderRecord[];
 }

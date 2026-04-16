@@ -1,6 +1,10 @@
 import Big from "big.js";
 import { intentsQuotation } from "../action/actionUtil/commonAction";
-import { pollingTransactionStatus } from "../view";
+import {
+  fetchIntentsCreateOrder,
+  fetchIntentsOrders,
+  pollingTransactionStatus,
+} from "../view";
 import type { IIntentsQuoteResult } from "../types/common";
 import { toNonDivisibleNumber, toReadableNumber } from "../utils/numbers";
 import {
@@ -19,6 +23,8 @@ import {
 import { calculateLsdFromUsdt, calculateUsdtFromLsd } from "./view";
 import type {
   LsdIntentsTransactionStatusesResult,
+  LsdIntentsOrdersParams,
+  LsdIntentsOrdersResult,
   LsdIntentsQuote,
   LsdPreparationStage,
   LsdPrepareParams,
@@ -155,6 +161,37 @@ async function quoteNearUsdtToBscUsdt(
     slippageTolerance: params.slippageTolerance,
   });
 }
+
+async function createOrderBscUsdtToNearUsdt(
+  params: QuoteLegParams
+): Promise<IIntentsQuoteResult> {
+  return fetchIntentsCreateOrder({
+    originAsset: BSC_USDT_INTENTS_ASSET_ID,
+    destinationAsset: NEAR_USDT_INTENTS_ASSET_ID,
+    amount: params.amount,
+    refundTo: params.refundTo,
+    recipient: params.recipient,
+    customRecipientMsg: params.customRecipientMsg,
+    dry: params.dry,
+    slippageTolerance: params.slippageTolerance,
+  });
+}
+
+async function createOrderBscLsdToNearLsd(
+  params: QuoteLegParams
+): Promise<IIntentsQuoteResult> {
+  return fetchIntentsCreateOrder({
+    originAsset: BSC_NRUSDT_INTENTS_ASSET_ID,
+    destinationAsset: NEAR_NRUSDT_INTENTS_ASSET_ID,
+    amount: params.amount,
+    refundTo: params.refundTo,
+    recipient: params.recipient,
+    customRecipientMsg: params.customRecipientMsg,
+    dry: params.dry,
+    slippageTolerance: params.slippageTolerance,
+  });
+}
+
 function buildPreparedTransfer(params: {
   tokenAddress: string;
   tokenSymbol: "USDT" | "lsdUSDT";
@@ -313,7 +350,7 @@ export async function prepareLsdSupplyByIntents(
       "LSD supply return"
     );
 
-    const finalQuote = await quoteBscUsdtToNearUsdt({
+    const finalQuote = await createOrderBscUsdtToNearUsdt({
       amount: supplyAmountRaw,
       refundTo: params.accountAddress,
       recipient: LSD_CONTRACT_ID,
@@ -410,7 +447,7 @@ export async function prepareLsdWithdrawByIntents(
       "LSD withdraw return"
     );
 
-    const finalQuote = await quoteBscLsdToNearLsd({
+    const finalQuote = await createOrderBscLsdToNearLsd({
       amount: withdrawAmountRaw,
       refundTo: params.accountAddress,
       recipient: LSD_CONTRACT_ID,
@@ -516,5 +553,48 @@ export async function pollLsdIntentsTransactionStatuses(params: {
       status: returnBridge.status,
       swapDetails: returnBridge.swapDetails,
     },
+  };
+}
+
+export async function getLsdIntentsOrderHistory(
+  params: LsdIntentsOrdersParams
+): Promise<LsdIntentsOrdersResult> {
+  if (!params.accountId) {
+    throw new Error("accountId is required");
+  }
+
+  const response = await fetchIntentsOrders({
+    refundTo: params.accountId,
+    pageNumber: params.pageNumber,
+    pageSize: params.pageSize,
+  });
+
+  if (!response) {
+    throw new Error("Failed to fetch LSD intents order history");
+  }
+
+  const recordList = Array.isArray(response.record_list)
+    ? response.record_list.map((record: any) => ({
+        timestamp: record?.quote_response?.timestamp,
+        status: record?.status || "",
+        quoteRequest: {
+          originAsset: record?.quote_response?.quoteRequest?.originAsset || "",
+          destinationAsset:
+            record?.quote_response?.quoteRequest?.destinationAsset || "",
+          recipient: record?.quote_response?.quoteRequest?.recipient || "",
+          refundTo: record?.quote_response?.quoteRequest?.refundTo || "",
+          customRecipientMsg:
+            record?.quote_response?.quoteRequest?.customRecipientMsg || "",
+        },
+        quote: record?.quote_response?.quote,
+      }))
+    : [];
+
+  return {
+    page_number: response.page_number || 1,
+    page_size: response.page_size || recordList.length,
+    total_page: response.total_page || 0,
+    total_size: response.total_size || recordList.length,
+    record_list: recordList,
   };
 }
