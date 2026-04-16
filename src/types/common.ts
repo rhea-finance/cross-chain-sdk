@@ -21,6 +21,7 @@ export interface QuotationParams {
   isReverse?: boolean;
   dry?: boolean;
   slippageTolerance?: number;
+  authorization?: string;
 }
 
 export interface IntentsOrdersParams {

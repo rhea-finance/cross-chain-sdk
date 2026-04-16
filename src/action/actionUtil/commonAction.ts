@@ -17,6 +17,7 @@ export async function intentsQuotation({
   isReverse,
   dry,
   slippageTolerance,
+  authorization,
 }: {
   originAsset: string;
   destinationAsset: string;
@@ -27,6 +28,7 @@ export async function intentsQuotation({
   isReverse?: boolean;
   dry?: boolean;
   slippageTolerance?: number;
+  authorization?: string;
 }) {
   const res_quote = await fetchIntentsQuotation({
     originAsset,
@@ -37,6 +39,7 @@ export async function intentsQuotation({
     isReverse,
     dry,
     slippageTolerance,
+    authorization,
     ...(customRecipientMsg ? { customRecipientMsg } : {}),
   });
   return res_quote;

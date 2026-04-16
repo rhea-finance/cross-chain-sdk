@@ -15,6 +15,7 @@ import {
   BSC_USDT_DECIMALS,
   BSC_USDT_INTENTS_ASSET_ID,
   LSD_CONTRACT_ID,
+  LSD_INTENTS_QUOTE_AUTHORIZATION,
   LSD_USDT_DECIMALS,
   NEAR_NRUSDT_INTENTS_ASSET_ID,
   NEAR_USDT_DECIMALS,
@@ -114,6 +115,7 @@ async function quoteBscUsdtToNearUsdt(
     customRecipientMsg: params.customRecipientMsg,
     dry: params.dry,
     slippageTolerance: params.slippageTolerance,
+    authorization: LSD_INTENTS_QUOTE_AUTHORIZATION,
   });
 }
 
@@ -129,6 +131,7 @@ async function quoteNearLsdToBscLsd(
     customRecipientMsg: params.customRecipientMsg,
     dry: params.dry,
     slippageTolerance: params.slippageTolerance,
+    authorization: LSD_INTENTS_QUOTE_AUTHORIZATION,
   });
 }
 
@@ -144,6 +147,7 @@ async function quoteBscLsdToNearLsd(
     customRecipientMsg: params.customRecipientMsg,
     dry: params.dry,
     slippageTolerance: params.slippageTolerance,
+    authorization: LSD_INTENTS_QUOTE_AUTHORIZATION,
   });
 }
 
@@ -159,6 +163,7 @@ async function quoteNearUsdtToBscUsdt(
     customRecipientMsg: params.customRecipientMsg,
     dry: params.dry,
     slippageTolerance: params.slippageTolerance,
+    authorization: LSD_INTENTS_QUOTE_AUTHORIZATION,
   });
 }
 

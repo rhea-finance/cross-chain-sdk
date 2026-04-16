@@ -297,6 +297,11 @@ export async function fetchIntentsQuotation(
       method: "POST",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
+        ...(params.authorization
+          ? {
+              Authorization: params.authorization,
+            }
+          : {}),
       },
       body: JSON.stringify(res_params),
     }).then((res) => {
