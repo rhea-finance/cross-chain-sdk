@@ -331,12 +331,15 @@ export async function fetchIntentsCreateOrder(
       return res.json();
     });
 
-    return normalizeIntentsQuoteResponse(response);
+    const normalizedResponse = normalizeIntentsQuoteResponse(response);
+
+    if (normalizedResponse.quoteStatus === "success") {
+      return normalizedResponse;
+    }
+
+    return fetchIntentsQuotation(params);
   } catch (error: any) {
-    return {
-      quoteStatus: "error",
-      message: error?.message || error?.error,
-    };
+    return fetchIntentsQuotation(params);
   }
 }
 
