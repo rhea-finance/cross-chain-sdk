@@ -930,6 +930,7 @@ import {
   calculateLsdFromUsdt,
   calculateUsdtFromLsd,
   getLsdBalances,
+  getLsdIntentsOrderHistory,
   pollLsdIntentsTransactionStatuses,
   prepareLsdSupplyByIntents,
   prepareLsdWithdrawByIntents,
@@ -957,6 +958,20 @@ const balances = await getLsdBalances({
 });
 console.log(balances.usdt);
 console.log(balances.lsdUsdt);
+
+// Query LSD intents order history for the current wallet.
+// The SDK returns a lightweight record_list with:
+//   timestamp
+//   status
+//   quoteRequest.originAsset / destinationAsset / recipient / refundTo / customRecipientMsg
+//   quote (all fields)
+const history = await getLsdIntentsOrderHistory({
+  accountId: accountAddress,
+  pageSize: 10,
+});
+console.log(history.total_size);
+console.log(history.record_list[0]?.status);
+console.log(history.record_list[0]?.quote.depositAddress);
 
 // Exchange conversion helpers return both readable and raw values.
 const lsdFromUsdt = await calculateLsdFromUsdt("100");
