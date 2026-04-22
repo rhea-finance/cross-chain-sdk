@@ -10,7 +10,19 @@ import {
   QuotationParams,
 } from "../types/index";
 import { bignumber } from "mathjs";
-const { oneClickUrl, indexUrl, findPathUrl } = config_near;
+
+function getNearRuntimeUrls() {
+  return {
+    oneClickUrl: config_near.oneClickUrl,
+    indexUrl: config_near.indexUrl,
+    findPathUrl: config_near.findPathUrl,
+  };
+}
+
+function getIntentsOrderApiUrl() {
+  return `${config_near.indexUrl}/api/1click`;
+}
+
 let _signatureCache: { key: CryptoKey; raw: Uint8Array } | null = null;
 
 async function _getOrImportKey(): Promise<{
@@ -240,8 +252,6 @@ export async function get_tx_id(receipt_id: string) {
   }
 }
 
-const INTENTS_ORDER_API_URL = `${indexUrl}/api/1click`;
-
 function buildIntentsQuoteRequest(params: QuotationParams) {
   return {
     originAsset: params?.originAsset,
@@ -293,6 +303,7 @@ export async function fetchIntentsQuotation(
 ): Promise<IIntentsQuoteResult> {
   try {
     const res_params = buildIntentsQuoteRequest(params);
+    const { oneClickUrl } = getNearRuntimeUrls();
     const response: any = await fetch(`${oneClickUrl}/quote`, {
       method: "POST",
       headers: {
@@ -321,7 +332,8 @@ export async function fetchIntentsCreateOrder(
 ): Promise<IIntentsQuoteResult> {
   try {
     const res_params = buildIntentsQuoteRequest(params);
-    const response: any = await fetch(`${INTENTS_ORDER_API_URL}/create-order`, {
+    const intentsOrderApiUrl = getIntentsOrderApiUrl();
+    const response: any = await fetch(`${intentsOrderApiUrl}/create-order`, {
       method: "POST",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
@@ -345,6 +357,7 @@ export async function fetchIntentsCreateOrder(
 
 export async function fetchIntentsOrders(params: IntentsOrdersParams) {
   try {
+    const intentsOrderApiUrl = getIntentsOrderApiUrl();
     const searchParams = new URLSearchParams({
       refund_to: params.refundTo,
     });
@@ -358,7 +371,7 @@ export async function fetchIntentsOrders(params: IntentsOrdersParams) {
     }
 
     const response = await fetch(
-      `${INTENTS_ORDER_API_URL}/orders?${searchParams.toString()}`,
+      `${intentsOrderApiUrl}/orders?${searchParams.toString()}`,
       {
         method: "GET",
         headers: {
@@ -378,6 +391,7 @@ export async function fetchIntentsOrders(params: IntentsOrdersParams) {
 
 export async function fetchIntentsTransactionStatus(depositAddress: string) {
   try {
+    const { oneClickUrl } = getNearRuntimeUrls();
     const response = await fetch(
       `${oneClickUrl}/status?depositAddress=${depositAddress}`,
       {
@@ -398,6 +412,7 @@ export async function fetchIntentsTransactionStatus(depositAddress: string) {
 
 export async function fetchIntentsTokens(): Promise<IIntentItem[]> {
   try {
+    const { oneClickUrl } = getNearRuntimeUrls();
     const response = await fetch(`${oneClickUrl}/tokens`, {
       method: "GET",
       headers: {
@@ -475,6 +490,7 @@ export async function findPath({
     slippage: String(Number(slippage)),
   });
 
+  const { findPathUrl } = getNearRuntimeUrls();
   const url = `${findPathUrl}/findPath?${params.toString()}`;
 
   const resultFromServer = await fetch(url, { signal: controller.signal })
@@ -493,6 +509,7 @@ export async function getMultichainLendingConfig(): Promise<
   Record<string, string>[]
 > {
   try {
+    const { indexUrl } = getNearRuntimeUrls();
     const response = await fetch(`${indexUrl}/get_multichain_lending_config`, {
       method: "GET",
       headers: {
@@ -524,6 +541,7 @@ export async function postMultichainLendingRequests({
   msg: string;
 }> {
   try {
+    const { indexUrl } = getNearRuntimeUrls();
     const params = {
       mca_id,
       wallet,
@@ -550,6 +568,7 @@ export async function getMultichainLendingData(
   batch_id: string
 ): Promise<IRelayerResult[]> {
   try {
+    const { indexUrl } = getNearRuntimeUrls();
     const response = await fetch(
       `${indexUrl}/get_multichain_lending_data?batch_id=${batch_id}`,
       {
@@ -619,6 +638,7 @@ export async function getMultichainLendingHistory({
   page_size: number;
 }) {
   try {
+    const { indexUrl } = getNearRuntimeUrls();
     const response = await fetch(
       `${indexUrl}/get_multichain_lending_history?mca_id=${mca_id}&page_number=${page_number}&page_size=${page_size}`,
       {
@@ -653,6 +673,7 @@ export async function postMultichainLendingReport({
   msg: string;
 }> {
   try {
+    const { indexUrl } = getNearRuntimeUrls();
     const params = {
       mca_id,
       wallet,
@@ -680,6 +701,7 @@ export async function getMultichainTokensByChains(
   chains: string
 ): Promise<IIntentItem[]> {
   try {
+    const { indexUrl } = getNearRuntimeUrls();
     const response = await fetch(
       `${indexUrl}/get_multichain_lending_tokens_data?chains=${chains}`,
       {

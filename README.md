@@ -1178,14 +1178,36 @@ if (
 - `config_evm` - EVM chain configuration
 - `config_solana` - Solana chain configuration
 - `config_btc` - Bitcoin chain configuration
+- `setSdkEnv` - Switch SDK environment between `prd` and `stg`
+- `getSdkEnv` - Get current SDK environment
 - `setCustomNodeUrl` - Set custom RPC node URL for NEAR chain. This function allows you to customize the RPC endpoint used for NEAR chain interactions.
 
 ```typescript
-import { setCustomNodeUrl } from "@rhea-finance/cross-chain-sdk";
+import {
+  setSdkEnv,
+  getSdkEnv,
+  setCustomNodeUrl,
+} from "@rhea-finance/cross-chain-sdk";
 
-// Set custom NEAR RPC node URL
+// Default environment is prd
+console.log(getSdkEnv()); // "prd"
+
+// Switch to stg
+setSdkEnv("stg");
+console.log(getSdkEnv()); // "stg"
+
+// Switch back to prd
+setSdkEnv("prd");
+console.log(getSdkEnv()); // "prd"
+
+// Set custom NEAR RPC node URL for the current environment
 setCustomNodeUrl("https://your-custom-near-rpc-url.com");
 ```
+
+Notes:
+- The default SDK environment is `prd`.
+- `setSdkEnv("stg" | "prd")` only switches the SDK environment.
+- `setCustomNodeUrl(...)` only overrides the NEAR RPC URL of the current environment and does not switch between `stg` and `prd`.
 
 ### Type Definitions
 
