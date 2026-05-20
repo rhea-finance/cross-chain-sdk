@@ -16,6 +16,7 @@ interface INEARConfig {
   WBTC_TOKEN_ID: string;
   hiddenAssets: string[];
   oneClickUrl: string;
+  oneClickProxyUrl: string;
   findPathUrl: string;
   RELAYER_ID: string;
 }
@@ -41,6 +42,7 @@ const NEAR_CONFIGS: Record<SdkEnv, INEARConfig> = {
     dataServiceUrl: "https://apidata.rhea.finance",
     txIdApiUrl: "https://api3.nearblocks.io",
     oneClickUrl: "https://1click.chaindefuser.com/v0",
+    oneClickProxyUrl: "https://api.rhea.finance/api/1click",
     findPathUrl: "https://smartrouter.rhea.finance",
     hiddenAssets: [
       "meta-token.near",
@@ -72,6 +74,7 @@ const NEAR_CONFIGS: Record<SdkEnv, INEARConfig> = {
     dataServiceUrl: "https://apidata.rhea.finance",
     txIdApiUrl: "https://api3.nearblocks.io",
     oneClickUrl: "https://1click.chaindefuser.com/v0",
+    oneClickProxyUrl: "https://api.rhea.finance/api/1click",
     findPathUrl: "https://smartrouter.rhea.finance",
     hiddenAssets: [
       "meta-token.near",

@@ -14,6 +14,7 @@ import { bignumber } from "mathjs";
 function getNearRuntimeUrls() {
   return {
     oneClickUrl: config_near.oneClickUrl,
+    oneClickProxyUrl: config_near.oneClickProxyUrl,
     indexUrl: config_near.indexUrl,
     findPathUrl: config_near.findPathUrl,
   };
@@ -303,8 +304,8 @@ export async function fetchIntentsQuotation(
 ): Promise<IIntentsQuoteResult> {
   try {
     const res_params = buildIntentsQuoteRequest(params);
-    const { oneClickUrl } = getNearRuntimeUrls();
-    const response: any = await fetch(`${oneClickUrl}/quote`, {
+    const { oneClickProxyUrl } = getNearRuntimeUrls();
+    const response: any = await fetch(`${oneClickProxyUrl}/quote`, {
       method: "POST",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
@@ -391,9 +392,9 @@ export async function fetchIntentsOrders(params: IntentsOrdersParams) {
 
 export async function fetchIntentsTransactionStatus(depositAddress: string) {
   try {
-    const { oneClickUrl } = getNearRuntimeUrls();
+    const { oneClickProxyUrl } = getNearRuntimeUrls();
     const response = await fetch(
-      `${oneClickUrl}/status?depositAddress=${depositAddress}`,
+      `${oneClickProxyUrl}/status?depositAddress=${depositAddress}`,
       {
         method: "GET",
         headers: {
