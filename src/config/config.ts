@@ -99,6 +99,15 @@ export const getSdkEnv = (): SdkEnv => {
   return currentSdkEnv;
 };
 
+const DEFAULT_REFERRAL = "rhea";
+let currentReferral: string = DEFAULT_REFERRAL;
+export const setReferral = (referral: string) => {
+  currentReferral = referral || DEFAULT_REFERRAL;
+};
+export const getReferral = (): string => {
+  return currentReferral;
+};
+
 const customNodeUrls: Partial<Record<SdkEnv, string>> = {};
 export const setCustomNodeUrl = (nodeUrl: string) => {
   customNodeUrls[currentSdkEnv] = nodeUrl;

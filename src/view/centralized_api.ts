@@ -1,5 +1,5 @@
 import Big from "big.js";
-import { config_near } from "../config/config";
+import { config_near, getReferral } from "../config/config";
 import {
   IRelayerResult,
   IIntentItem,
@@ -267,7 +267,7 @@ function buildIntentsQuoteRequest(params: QuotationParams) {
     recipientType: "DESTINATION_CHAIN",
     depositType: "ORIGIN_CHAIN",
     deadline: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
-    referral: "rhea",
+    referral: getReferral(),
     quoteWaitingTimeMs: 3000,
     slippageTolerance:
       typeof params.slippageTolerance == "number" ? params.slippageTolerance : 50,
