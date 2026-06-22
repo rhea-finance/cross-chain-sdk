@@ -24,6 +24,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "type-check": "tsc --noEmit",
+    "test:near-rpc-failover": "pnpm build && node scripts/near-rpc-failover-test.mjs",
     "prettier:fix": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json}\"",
     "prepublishOnly": "pnpm build"
   },

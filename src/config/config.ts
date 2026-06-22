@@ -4,6 +4,7 @@ const INFURA_KEY = "45ad2962c1b5465bb6fe62db0d35b42f";
 interface INEARConfig {
   networkId: string;
   nodeUrl: string;
+  nodeUrls: string[];
   explorerUrl: string;
   LOGIC_CONTRACT_NAME: string;
   REF_EXCHANGE_ID: string;
@@ -25,10 +26,16 @@ interface INEARConfig {
 
 export type SdkEnv = "prd" | "stg";
 
+const DEFAULT_NEAR_NODE_URLS = [
+  "https://free.rpc.fastnear.com",
+  "https://nearinner.deltarpc.com",
+];
+
 const NEAR_CONFIGS: Record<SdkEnv, INEARConfig> = {
   prd: {
     networkId: "mainnet",
-    nodeUrl: "https://free.rpc.fastnear.com",
+    nodeUrl: DEFAULT_NEAR_NODE_URLS[0],
+    nodeUrls: DEFAULT_NEAR_NODE_URLS,
     explorerUrl: "https://nearblocks.io",
     LOGIC_CONTRACT_NAME: "contract.main.burrow.near",
     AM_CONTRACT: "multica.near",
@@ -60,7 +67,8 @@ const NEAR_CONFIGS: Record<SdkEnv, INEARConfig> = {
   },
   stg: {
     networkId: "mainnet",
-    nodeUrl: "https://free.rpc.fastnear.com",
+    nodeUrl: DEFAULT_NEAR_NODE_URLS[0],
+    nodeUrls: DEFAULT_NEAR_NODE_URLS,
     explorerUrl: "https://nearblocks.io",
     LOGIC_CONTRACT_NAME: "br.private-mainnet.ref-dev-team.near",
     AM_CONTRACT: "ma.private-mainnet.ref-dev-team.near",
@@ -120,15 +128,25 @@ export const setIntentsQuoteConfig = (
   intentsQuoteConfig = {
     ...intentsQuoteConfig,
     ...config,
-    referral: config.referral || intentsQuoteConfig.referral || DEFAULT_REFERRAL,
+    referral:
+      config.referral || intentsQuoteConfig.referral || DEFAULT_REFERRAL,
   };
 };
 
-export const getIntentsQuoteConfig = (): IntentsQuoteConfig => intentsQuoteConfig;
+export const getIntentsQuoteConfig = (): IntentsQuoteConfig =>
+  intentsQuoteConfig;
 
-const customNodeUrls: Partial<Record<SdkEnv, string>> = {};
+const customNodeUrls: Partial<Record<SdkEnv, string[]>> = {};
 export const setCustomNodeUrl = (nodeUrl: string) => {
-  customNodeUrls[currentSdkEnv] = nodeUrl;
+  customNodeUrls[currentSdkEnv] = [nodeUrl];
+};
+
+export const setCustomNodeUrls = (nodeUrls: string[]) => {
+  const validNodeUrls = nodeUrls.filter(Boolean);
+  if (!validNodeUrls.length) {
+    throw new Error("setCustomNodeUrls requires at least one NEAR RPC URL");
+  }
+  customNodeUrls[currentSdkEnv] = [...validNodeUrls];
 };
 const STATIC_CONFIG = {
   BTC: {},
@@ -308,9 +326,11 @@ type ICurrentConfig = {
 function getCurrentConfig(): ICurrentConfig {
   const env = getSdkEnv();
   const currentNearConfig = NEAR_CONFIGS[env];
+  const nodeUrls = customNodeUrls[env] || currentNearConfig.nodeUrls;
   const NEAR_CONFIG: INEARConfig = {
     ...currentNearConfig,
-    nodeUrl: customNodeUrls[env] || currentNearConfig.nodeUrl,
+    nodeUrl: nodeUrls[0],
+    nodeUrls: [...nodeUrls],
   };
   return {
     NEAR: NEAR_CONFIG,

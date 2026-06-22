@@ -1181,12 +1181,14 @@ if (
 - `setSdkEnv` - Switch SDK environment between `prd` and `stg`
 - `getSdkEnv` - Get current SDK environment
 - `setCustomNodeUrl` - Set custom RPC node URL for NEAR chain. This function allows you to customize the RPC endpoint used for NEAR chain interactions.
+- `setCustomNodeUrls` - Set multiple custom NEAR RPC node URLs. The SDK falls back to the next URL when the active RPC is rate limited or unavailable.
 
 ```typescript
 import {
   setSdkEnv,
   getSdkEnv,
   setCustomNodeUrl,
+  setCustomNodeUrls,
 } from "@rhea-finance/cross-chain-sdk";
 
 // Default environment is prd
@@ -1202,12 +1204,19 @@ console.log(getSdkEnv()); // "prd"
 
 // Set custom NEAR RPC node URL for the current environment
 setCustomNodeUrl("https://your-custom-near-rpc-url.com");
+
+// Set custom NEAR RPC failover URLs for the current environment
+setCustomNodeUrls([
+  "https://your-primary-near-rpc-url.com",
+  "https://your-secondary-near-rpc-url.com",
+]);
 ```
 
 Notes:
 - The default SDK environment is `prd`.
 - `setSdkEnv("stg" | "prd")` only switches the SDK environment.
 - `setCustomNodeUrl(...)` only overrides the NEAR RPC URL of the current environment and does not switch between `stg` and `prd`.
+- By default, NEAR view and balance calls use `https://free.rpc.fastnear.com` first and fall back to `https://nearinner.deltarpc.com` on transient failures such as HTTP 429, HTTP 408, HTTP 5xx, or network errors.
 
 ### Type Definitions
 
