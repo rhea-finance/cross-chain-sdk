@@ -11,6 +11,15 @@ export interface ILendingData {
 }
 export type IStatus = "success" | "error";
 
+/**
+ * Application fee attached to an intents quote.
+ * `fee` is in basis points (1/100th of a percent); 100 = 1%.
+ */
+export interface IAppFee {
+  recipient: string;
+  fee: number;
+}
+
 export interface QuotationParams {
   originAsset: string;
   destinationAsset: string;
@@ -22,6 +31,10 @@ export interface QuotationParams {
   dry?: boolean;
   slippageTolerance?: number;
   authorization?: string;
+  /** Per-call app fees; overrides the value set via setIntentsQuoteConfig. */
+  appFees?: IAppFee[];
+  /** Escape hatch for arbitrary 1Click fields, spread last into the request. */
+  extraParams?: Record<string, unknown>;
 }
 
 export interface IntentsOrdersParams {

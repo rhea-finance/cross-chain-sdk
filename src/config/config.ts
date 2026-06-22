@@ -1,3 +1,5 @@
+import type { IAppFee } from "../types/common";
+
 const INFURA_KEY = "45ad2962c1b5465bb6fe62db0d35b42f";
 interface INEARConfig {
   networkId: string;
@@ -99,14 +101,30 @@ export const getSdkEnv = (): SdkEnv => {
   return currentSdkEnv;
 };
 
+/**
+ * Configuration applied to every intents quote request. Exposed as a single
+ * mergeable object so integrators can set referral, app fees, and future
+ * fields without changing the SDK each time.
+ */
+export interface IntentsQuoteConfig {
+  referral: string;
+  appFees?: IAppFee[];
+}
+
 const DEFAULT_REFERRAL = "rhea";
-let currentReferral: string = DEFAULT_REFERRAL;
-export const setReferral = (referral: string) => {
-  currentReferral = referral || DEFAULT_REFERRAL;
+let intentsQuoteConfig: IntentsQuoteConfig = { referral: DEFAULT_REFERRAL };
+
+export const setIntentsQuoteConfig = (
+  config: Partial<IntentsQuoteConfig>
+): void => {
+  intentsQuoteConfig = {
+    ...intentsQuoteConfig,
+    ...config,
+    referral: config.referral || intentsQuoteConfig.referral || DEFAULT_REFERRAL,
+  };
 };
-export const getReferral = (): string => {
-  return currentReferral;
-};
+
+export const getIntentsQuoteConfig = (): IntentsQuoteConfig => intentsQuoteConfig;
 
 const customNodeUrls: Partial<Record<SdkEnv, string>> = {};
 export const setCustomNodeUrl = (nodeUrl: string) => {

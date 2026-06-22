@@ -1,5 +1,5 @@
 import Big from "big.js";
-import { config_near, getReferral } from "../config/config";
+import { config_near, getIntentsQuoteConfig } from "../config/config";
 import {
   IRelayerResult,
   IIntentItem,
@@ -254,6 +254,8 @@ export async function get_tx_id(receipt_id: string) {
 }
 
 function buildIntentsQuoteRequest(params: QuotationParams) {
+  const { referral, appFees } = getIntentsQuoteConfig();
+  const resolvedAppFees = params.appFees ?? appFees;
   return {
     originAsset: params?.originAsset,
     destinationAsset: params?.destinationAsset,
@@ -267,10 +269,12 @@ function buildIntentsQuoteRequest(params: QuotationParams) {
     recipientType: "DESTINATION_CHAIN",
     depositType: "ORIGIN_CHAIN",
     deadline: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
-    referral: getReferral(),
+    referral,
     quoteWaitingTimeMs: 3000,
     slippageTolerance:
       typeof params.slippageTolerance == "number" ? params.slippageTolerance : 50,
+    ...(resolvedAppFees ? { appFees: resolvedAppFees } : {}),
+    ...(params.extraParams ?? {}),
   };
 }
 
