@@ -2,6 +2,8 @@
 
 Cross-chain lending SDK that supports unified lending operations across multiple blockchains, including EVM chains, Solana, Bitcoin, and NEAR.
 
+[swap api doc](https://github.com/rhea-finance/rhea-sdk-docs/blob/main/MCA_SWAP_HTTP_API.md "")
+
 ## Features
 
 - 🔗 **Cross-chain Support**: Supports multi-chain operations on EVM, Solana, Bitcoin, and NEAR
