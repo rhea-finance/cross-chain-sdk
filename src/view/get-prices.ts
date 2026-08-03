@@ -23,14 +23,20 @@ const getPrices = async ({
 }): Promise<IPrices | undefined> => {
   const { enable_pyth_oracle } = config;
   if (enable_pyth_oracle) {
-    const pythResponse = await getPythPrices(token_pyth_infos);
+    const pythResponse = await getPythPrices(
+      token_pyth_infos,
+      config.pyth_oracle_account_id
+    );
     return pythResponse;
   } else {
     const oracleResponse = await getOraclePrices();
     return oracleResponse;
   }
 };
-const getPythPrices = async (token_pyth_infos: Record<string, IPythInfo>) => {
+const getPythPrices = async (
+  token_pyth_infos: Record<string, IPythInfo>,
+  pythOracleAccountId = config_near.PYTH_ORACLE_ID
+) => {
   const nearTokenId = "wrap.near";
   const XRHEA_TOKEN = "xtoken.rhealab.near";
   const NEARX_TOKEN = "v2-nearx.stader-labs.near";
@@ -55,7 +61,7 @@ const getPythPrices = async (token_pyth_infos: Record<string, IPythInfo>) => {
     };
     const identifiers = array_coins.map((coin) => coin[1].price_identifier);
     const list_prices_map = await view_on_near({
-      contractId: config_near.PYTH_ORACLE_ID,
+      contractId: pythOracleAccountId,
       methodName: ViewMethodsPyth[ViewMethodsPyth.list_prices_no_older_than],
       args: {
         price_ids: identifiers,

@@ -8,6 +8,7 @@ export interface IConfig {
   maximum_staleness_duration_sec: number;
   minimum_staking_duration_sec: number;
   oracle_account_id: string;
+  pyth_oracle_account_id?: string;
   ref_exchange_id: string;
   owner_id: string;
   x_booster_multiplier_at_maximum_staking_duration: number;
