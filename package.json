@@ -1,6 +1,6 @@
 {
   "name": "@rhea-finance/cross-chain-sdk",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "Cross-chain lending SDK",
   "type": "module",
   "main": "./dist/index.js",
@@ -24,6 +24,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "type-check": "tsc --noEmit",
+    "test:batch-views-errors": "pnpm build && node scripts/batch-views-error-test.mjs",
     "test:near-rpc-failover": "pnpm build && node scripts/near-rpc-failover-test.mjs",
     "prettier:fix": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json}\"",
     "prepublishOnly": "pnpm build"

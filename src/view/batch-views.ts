@@ -13,37 +13,52 @@ import { transformPortfolio } from "../utils";
 export async function batchViews(
   account_id?: string | undefined
 ): Promise<ILendingData> {
-  try {
-    const res = await view_on_near({
-      contractId: config_near.LOGIC_CONTRACT_NAME,
-      methodName: ViewMethodsLogic[ViewMethodsLogic.batch_views],
-      args: {
-        ...(account_id ? { account_id } : {}),
-        assets: true,
-        config: true,
-        token_pyth_infos: true,
-      },
-    });
-    const [
-      account_all_positions,
-      ,
-      assets_paged_detailed,
-      config,
-      ,
-      ,
-      ,
-      token_pyth_infos,
-    ] = res;
-    return {
-      account_all_positions,
-      assets_paged_detailed,
-      config,
-      token_pyth_infos,
-    };
-  } catch (e) {
-    console.error("batchViews error:", e);
-    return {} as any;
+  const res = await view_on_near({
+    contractId: config_near.LOGIC_CONTRACT_NAME,
+    methodName: ViewMethodsLogic[ViewMethodsLogic.batch_views],
+    args: {
+      ...(account_id ? { account_id } : {}),
+      assets: true,
+      config: true,
+      token_pyth_infos: true,
+    },
+  });
+
+  if (!Array.isArray(res)) {
+    throw new Error("Invalid batch_views response: expected an array");
   }
+
+  const [
+    account_all_positions,
+    ,
+    assets_paged_detailed,
+    config,
+    ,
+    ,
+    ,
+    token_pyth_infos,
+  ] = res;
+
+  if (
+    !Array.isArray(assets_paged_detailed) ||
+    !config ||
+    typeof config !== "object" ||
+    Array.isArray(config) ||
+    !token_pyth_infos ||
+    typeof token_pyth_infos !== "object" ||
+    Array.isArray(token_pyth_infos)
+  ) {
+    throw new Error(
+      "Invalid batch_views response: required lending data is missing"
+    );
+  }
+
+  return {
+    account_all_positions,
+    assets_paged_detailed,
+    config,
+    token_pyth_infos,
+  };
 }
 
 export async function batchViewsData(
