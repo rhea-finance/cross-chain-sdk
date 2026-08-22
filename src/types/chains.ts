@@ -33,7 +33,8 @@ interface ITxRequest {
 export type IWallet =
   | { EVM: string }
   | { Solana: string }
-  | { Bitcoin: string };
+  | { Bitcoin: string }
+  | { Zcash: string };
 
 export type IChain = "evm" | "solana" | "btc" | "zcash";
 export interface IBusiness {

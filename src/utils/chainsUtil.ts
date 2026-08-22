@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import _ from "lodash";
-import { IChain } from "../types/chains";
+import { IChain, IWallet } from "../types/chains";
 import { view_on_near } from "../chains";
 
 export function format_wallet({
@@ -9,8 +9,8 @@ export function format_wallet({
 }: {
   chain: IChain;
   identityKey: string;
-}) {
-  let w;
+}): IWallet | undefined {
+  let w: IWallet | undefined;
   if (chain == "evm") {
     w = { EVM: identityKey.slice(2) };
   } else if (chain == "solana") {

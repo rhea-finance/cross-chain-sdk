@@ -125,11 +125,12 @@ import type { , IWallet } from "@rhea-finance/cross-chain-sdk";
 
 // Get MCA by wallet - query multi-chain account based on logged-in wallet
 // Parameters:
-//   chain: Supported chain type, currently supports "evm", "solana", "btc"
+//   chain: Supported chain type: "evm", "solana", "btc", or "zcash"
 //   identityKey: Unique identifier of the logged-in account on the specified chain
 //     - evm: Account ID (e.g., "0x1234...")
 //     - solana: Account ID (e.g., "ABC123...")
 //     - btc: Public key (e.g., "02abc123...")
+//     - zcash: Public identity key
 const mcaId: string | null = await getMcaByWallet({
   chain: "evm" as IChain,
   identityKey: "0x1234...",
@@ -1226,10 +1227,14 @@ Notes:
 
 ```typescript
 // Chain type
-type IChain = "evm" | "solana" | "btc";
+type IChain = "evm" | "solana" | "btc" | "zcash";
 
 // Wallet type
-type IWallet = { EVM: string } | { Solana: string } | { Bitcoin: string };
+type IWallet =
+  | { EVM: string }
+  | { Solana: string }
+  | { Bitcoin: string }
+  | { Zcash: string };
 
 ```
 
