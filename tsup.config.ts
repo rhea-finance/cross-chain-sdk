@@ -16,6 +16,7 @@ export default defineConfig({
     'near-api-js',
     /^@near-js\//,
     'buffer',
+    'util',
     'safe-buffer',
     'randombytes',
     'borsh',
