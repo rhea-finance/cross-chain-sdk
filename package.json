@@ -1,7 +1,8 @@
 {
   "name": "@rhea-finance/cross-chain-sdk",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "Cross-chain lending SDK",
+  "packageManager": "pnpm@10.33.4",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -37,28 +38,22 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@solana/spl-token": "0.4.13",
-    "@solana/web3.js": "1.98.0",
-    "big.js": "^7.0.1",
-    "bignumber.js": "^9.1.2",
-    "bn.js": "^5.2.2",
-    "bs58": "^6.0.0",
-    "btc-wallet": "0.5.100-beta",
-    "buffer": "^6.0.3",
-    "decimal.js": "^10.5.0",
-    "ethers": "5.7.2",
-    "lodash": "^4.17.21",
-    "mathjs": "^15.1.0",
-    "near-api-js": "4.0.3",
-    "ramda": "^0.32.0"
+    "big.js": "7.0.1",
+    "buffer": "6.0.3",
+    "decimal.js": "10.6.0",
+    "ethers": "6.17.0",
+    "lodash": "4.18.1",
+    "mathjs": "15.2.0",
+    "near-api-js": "5.1.1",
+    "ramda": "0.32.0",
+    "util": "0.12.5"
   },
   "devDependencies": {
-    "@types/big.js": "^6.2.2",
-    "@types/bn.js": "^5.2.0",
-    "@types/lodash": "^4.17.21",
-    "@types/node": "^20",
-    "prettier": "^3.6.2",
-    "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "@types/big.js": "6.2.2",
+    "@types/lodash": "4.17.25",
+    "@types/node": "20.19.25",
+    "prettier": "3.6.2",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3"
   }
 }

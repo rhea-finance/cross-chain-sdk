@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { Contract, JsonRpcProvider, formatUnits } from "ethers";
 import { config_evm } from "../config";
 import {
   BSC_LSD_USDT_ADDRESS,
@@ -19,17 +19,17 @@ async function getBscTokenBalance(params: {
   rpcUrl?: string;
 }): Promise<string> {
   try {
-    const provider = new ethers.providers.JsonRpcProvider(
+    const provider = new JsonRpcProvider(
       params.rpcUrl || config_evm.chains.bsc.rpcUrl
     );
-    const contract = new ethers.Contract(
+    const contract = new Contract(
       params.tokenAddress,
       ERC20_BALANCE_OF_ABI,
       provider
     );
     const balance = await contract.balanceOf(params.accountAddress);
 
-    return ethers.utils.formatUnits(balance, params.decimals);
+    return formatUnits(balance, params.decimals);
   } catch (error) {
     console.error("Failed to get BSC token balance", error);
     return "0";

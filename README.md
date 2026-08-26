@@ -1290,11 +1290,10 @@ pnpm prettier:fix
 Main dependencies include:
 
 - `ethers` - EVM chain interaction
-- `@solana/web3.js` - Solana chain interaction
 - `near-api-js` - NEAR chain interaction
-- `btc-wallet` - Bitcoin wallet support
-- `bignumber.js` / `big.js` / `decimal.js` - Big number calculations
-- `lodash` - Utility functions
+- `big.js` / `decimal.js` / `mathjs` - Precise number calculations
+- `lodash` / `ramda` - Utility functions
+- `buffer` - Browser-compatible binary encoding
 
 ## License
 
